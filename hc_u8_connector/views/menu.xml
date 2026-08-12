@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    
+    <menuitem id="menu_u8_root" name="U8 连接器" parent="purchase.menu_purchase_root" sequence="90" groups="base.group_system" />
+
+    <record id="action_u8_account" model="ir.actions.act_window">
+        <field name="name">U8 账套配置</field>
+        <field name="res_model">hc.u8.account</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'list_view_ref': 'hc_u8_connector.view_u8_account_tree'}</field>
+    </record>
+
+    <menuitem id="menu_u8_account" name="U8 账套配置" parent="menu_u8_root" sequence="10" action="action_u8_account" groups="base.group_system" />
+</odoo>
