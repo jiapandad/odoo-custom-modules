@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- 扩展比价单表单：加入合同需求勾选、合同按钮、合同状态 -->
+    <record id="view_bid_comparison_form_contract" model="ir.ui.view">
+        <field name="name">hc.bid.comparison.form.contract</field>
+        <field name="model">hc.bid.comparison</field>
+        <field name="inherit_id" ref="hc_purchase_quote_bid.view_bid_comparison_form"/>
+        <field name="arch" type="xml">
+
+            <!-- 在 header 的确认定标按钮前插入合同需求区域 -->
+            <xpath expr="//sheet/group[1]" position="before">
+                <group string="合同需求" colspan="4"
+                       invisible="state == 'draft'">
+                    <group>
+                        <field name="require_contract"
+                               widget="boolean_toggle"
+                               invisible="state in ('submitted', 'approved')"/>
+                        <label for="require_contract"
+                               string="本次采购需要签订采购合同"/>
+                    </group>
+                    <group invisible="not require_contract">
+                        <field name="contract_state" readonly="1"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <!-- 在 header 的确认定标按钮后加创建合同按钮 -->
+            <xpath expr="//button[@name='action_confirm_award']" position="after">
+                <button name="action_create_contract" type="object"
+                        string="创建合同" class="btn-primary"
+                        invisible="not require_contract or contract_state != 'pending' or state != 'approved'"
+                        help="基于中标物料自动创建采购合同"/>
+            </xpath>
+
+            <!-- 在 header 加入查看合同按钮 -->
+            <xpath expr="//button[@name='action_confirm_award']" position="before">
+                <button name="action_view_contracts" type="object"
+                        string="查看合同" class="btn-secondary"
+                        invisible="contract_count == 0"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
