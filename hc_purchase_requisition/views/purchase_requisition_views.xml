@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!--  列表视图                                                    -->
+    <!-- ============================================================ -->
+
+    <record id="view_purchase_requisition_list" model="ir.ui.view">
+        <field name="name">hc.purchase.requisition.list</field>
+        <field name="model">hc.purchase.requisition</field>
+        <field name="arch" type="xml">
+            <list decoration-info="state == 'submitted'"
+                  decoration-success="state == 'approved'"
+                  decoration-danger="state == 'rejected'"
+                  decoration-muted="state in ('draft', 'cancelled')">
+                <field name="name"/>
+                <field name="company_id" optional="show"/>
+                <field name="department_id" optional="show"/>
+                <field name="applicant_id"/>
+                <field name="requisition_type" widget="badge" optional="show"/>
+                <field name="date_required"/>
+                <field name="estimated_amount" sum="预估金额合计"
+                       widget="monetary"/>
+                <field name="line_count" string="项数" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'submitted'"
+                       decoration-success="state == 'approved'"
+                       decoration-danger="state == 'rejected'"
+                       decoration-muted="state in ('draft', 'cancelled')"/>
+                <field name="flow_id" optional="show"/>
+                <field name="create_date" optional="show"/>
+                <field name="applicant_user_id" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--  搜索视图                                                    -->
+    <!-- ============================================================ -->
+
+    <record id="view_purchase_requisition_search" model="ir.ui.view">
+        <field name="name">hc.purchase.requisition.search</field>
+        <field name="model">hc.purchase.requisition</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="applicant_id"/>
+                <field name="department_id"/>
+                <field name="company_id"/>
+                <field name="requisition_type"/>
+                <separator/>
+                <filter name="draft_filter" string="草稿"
+                        domain="[('state', '=', 'draft')]"/>
+                <filter name="submitted_filter" string="审批中"
+                        domain="[('state', '=', 'submitted')]"/>
+                <filter name="approved_filter" string="已审批"
+                        domain="[('state', '=', 'approved')]"/>
+                <filter name="rejected_filter" string="已驳回"
+                        domain="[('state', '=', 'rejected')]"/>
+                <filter name="cancelled_filter" string="已取消"
+                        domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter name="my_requests" string="我的申请"
+                        domain="[('applicant_user_id', '=', uid)]"/>
+                <separator/>
+                <filter name="group_state" string="按状态"
+                        context="{'group_by': 'state'}"/>
+                <filter name="group_department" string="按部门"
+                        context="{'group_by': 'department_id'}"/>
+                <filter name="group_type" string="按类型"
+                        context="{'group_by': 'requisition_type'}"/>
+                <filter name="group_company" string="按组织"
+                        context="{'group_by': 'company_id'}"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ============================================================ -->
+    <!--  表单视图                                                    -->
+    <!-- ============================================================ -->
+
+    <record id="view_purchase_requisition_form" model="ir.ui.view">
+        <field name="name">hc.purchase.requisition.form</field>
+        <field name="model">hc.purchase.requisition</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <!-- 草稿 → 提交审批 -->
+                    <button name="action_submit" type="object"
+                            string="提交审批" class="btn-primary"
+                            invisible="state != 'draft'"/>
+
+                    <!-- 审批中 → 查看审批 / 取消 -->
+                    <button name="action_view_approval" type="object"
+                            string="查看审批" class="btn-secondary"
+                            invisible="state != 'submitted' or not approval_request_id"/>
+                    <button name="action_cancel" type="object"
+                            string="取消" class="btn-secondary"
+                            invisible="state not in ('draft', 'submitted')"/>
+
+                    <!-- 已驳回 → 退回草稿 -->
+                    <button name="action_draft" type="object"
+                            string="退回草稿"
+                            invisible="state != 'rejected'"/>
+
+                    <!-- 已审批 → 生成询价单 -->
+                    <button name="action_create_rfq" type="object"
+                            string="生成采购询价单" class="btn-primary"
+                            invisible="state != 'approved' or rfq_id"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,submitted,approved"/>
+                </header>
+
+                <sheet class="o_form_sheet_wide">
+                    <!-- 顶部状态标签 -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_approval" type="object"
+                                class="o_stat_button" icon="fa-check-circle"
+                                invisible="not approval_request_id">
+                            <field name="approval_state" widget="statinfo"
+                                   string="审批状态"/>
+                        </button>
+                        <button name="action_view_rfq" type="object"
+                                class="o_stat_button" icon="fa-shopping-cart"
+                                invisible="not rfq_id">
+                            <field name="rfq_count" widget="statinfo"
+                                   string="询价单"/>
+                        </button>
+                    </div>
+
+                    <field name="rfq_id" invisible="1"/>
+
+                    <!-- 顶部：基本信息（单列宽字段） -->
+                    <group>
+                        <group>
+                            <field name="name"
+                                   invisible="state != 'draft'"
+                                   readonly="1" force_save="1"
+                                   string="单号"/>
+                            <div invisible="state == 'draft'" class="oe_title">
+                                <h1><field name="name"/></h1>
+                            </div>
+                        </group>
+                    </group>
+                    <group col="6" class="o_settings_group" style="width:100%">
+                        <group col="3" style="min-width:280px">
+                            <field name="company_id"
+                                   invisible="state != 'draft'"
+                                   force_save="1"
+                                   options="{'no_create': True}"
+                                   string="需求组织"/>
+                            <field name="department_id"
+                                   force_save="1"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="project_id"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="applicant_id"
+                                   options="{'no_create': True, 'no_open': True}"
+                                   string="申请人"/>
+                            <field name="requisition_type"
+                                   options="{'no_create': True}"/>
+                            <field name="date_required" readonly="1"
+                                   string="最晚需求日期"/>
+                            <field name="estimated_amount" widget="monetary"
+                                   readonly="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <!-- 申请说明 -->
+                    <group string="申请说明">
+                        <field name="description" nolabel="1"
+                               placeholder="请描述申请原因及特殊说明..."
+                               invisible="state not in ('draft')"/>
+                        <field name="description" nolabel="1"
+                               invisible="state in ('draft')"
+                               readonly="1"/>
+                    </group>
+
+                    <!-- 明细行 -->
+                    <group string="需求明细">
+                        <field name="line_ids" nolabel="1">
+                            <list editable="bottom">
+                                <field name="sequence" widget="handle"/>
+                                <field name="product_id"
+                                       context="{'search_default_filter_to_sell': 0}"/>
+                                <field name="material_type"/>
+                                <field name="specification"/>
+                                <field name="quantity"/>
+                                <field name="product_uom_id"
+                                       force_save="1"
+                                       options="{'no_create': True, 'no_open': True}"/>
+                                <field name="usage"/>
+                                <field name="standard"/>
+                                <field name="date_required"/>
+                                <field name="estimated_unit_price"
+                                       widget="monetary"/>
+                                <field name="estimated_subtotal"
+                                       widget="monetary" readonly="1"/>
+                                <field name="purchase_state" widget="badge"
+                                       column_invisible="1"/>
+                                <field name="note"/>
+                            </list>
+                        </field>
+                    </group>
+
+                </sheet>
+
+                <div class="o_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+</odoo>
