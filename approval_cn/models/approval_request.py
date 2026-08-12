@@ -62,7 +62,7 @@ class ApprovalRequest(models.Model):
     )
     approved_date = fields.Datetime(string='审批完成时间')
 
-    # ── 审批进度（多节点并行） ──
+    # ── 审批进度 ──
     current_node_ids = fields.Many2many(
         'approval.node', 'approval_request_current_node_rel',
         'request_id', 'node_id', string='当前审批节点',
@@ -78,6 +78,14 @@ class ApprovalRequest(models.Model):
     )
     record_count = fields.Integer(
         string='审批次数', compute='_compute_record_count',
+    )
+
+    # ── 加签记录 ──
+    countersign_ids = fields.One2many(
+        'approval.countersign', 'request_id', string='加签记录',
+    )
+    countersign_count = fields.Integer(
+        string='加签次数', compute='_compute_countersign_count',
     )
 
     # ── 抄送记录 ──
@@ -101,6 +109,12 @@ class ApprovalRequest(models.Model):
     # ── 申请说明 ──
     description = fields.Text(string='申请说明')
 
+    # ── 委托 ──
+    delegate_user_id = fields.Many2one(
+        'res.users', string='委托审批人',
+        help='将当前用户的所有待审批任务委托给此用户处理',
+    )
+
     @api.depends('name', 'category_id')
     def _compute_display_name(self):
         for req in self:
@@ -117,6 +131,11 @@ class ApprovalRequest(models.Model):
     def _compute_record_count(self):
         for req in self:
             req.record_count = len(req.record_ids)
+
+    @api.depends('countersign_ids')
+    def _compute_countersign_count(self):
+        for req in self:
+            req.countersign_count = len(req.countersign_ids)
 
     @api.depends('cc_ids')
     def _compute_cc_count(self):
@@ -151,6 +170,7 @@ class ApprovalRequest(models.Model):
             self._activate_node(node)
 
         self.message_post(body=_('审批请求已提交，进入审批流程。'))
+        self._send_push_notification('submitted')
         self._sync_business_model('submitted')
 
     def action_approve(self, comment=''):
@@ -162,7 +182,12 @@ class ApprovalRequest(models.Model):
         active_record = self._get_user_active_record(approver)[:1]
 
         if not active_record:
-            raise UserError(_('您没有待审批的节点。'))
+            # Check delegate
+            delegate_record = self._get_user_delegate_record(approver)
+            if delegate_record:
+                active_record = delegate_record
+            else:
+                raise UserError(_('您没有待审批的节点。'))
 
         active_record.write({
             'state': 'approved',
@@ -172,7 +197,10 @@ class ApprovalRequest(models.Model):
 
         node = active_record.node_id
         self.message_post(
-            body=_('%s 审批通过【%s】节点。') % (approver.name, node.name)
+            body=_('%s 审批通过【%s】节点。%s') % (
+                approver.name, node.name,
+                (' (委托)' if active_record.delegate_from_id else '')
+            )
         )
 
         if self._check_node_approved(node):
@@ -187,7 +215,11 @@ class ApprovalRequest(models.Model):
         active_record = self._get_user_active_record(approver)[:1]
 
         if not active_record:
-            raise UserError(_('您没有待审批的节点。'))
+            delegate_record = self._get_user_delegate_record(approver)
+            if delegate_record:
+                active_record = delegate_record
+            else:
+                raise UserError(_('您没有待审批的节点。'))
 
         reject_msg = reason or _('驳回')
         active_record.write({
@@ -209,11 +241,17 @@ class ApprovalRequest(models.Model):
         self.message_post(
             body=_('%s 驳回了审批【%s】：%s') % (approver.name, node.name, reject_msg)
         )
+        self._send_push_notification('rejected')
 
-    def action_cancel(self):
+    # ── 撤回（仅提交人可用） ────────────────────────────────────
+
+    def action_recall(self):
+        """提交人撤回审批中的请求"""
         self.ensure_one()
-        if self.state not in ('draft', 'submitted'):
-            raise UserError(_('只有草稿或审批中的请求才能撤回。'))
+        if self.state != 'submitted':
+            raise UserError(_('只有审批中的请求才能撤回。'))
+        if self.env.user != self.request_user_id and not self.env.user._is_admin():
+            raise UserError(_('只有申请人或管理员才能撤回审批请求。'))
 
         self.record_ids.filtered(lambda r: r.state == 'pending').write({
             'state': 'cancelled',
@@ -223,7 +261,30 @@ class ApprovalRequest(models.Model):
             'current_node_ids': [(5, 0, 0)],
             'approved_date': fields.Datetime.now(),
         })
-        self.message_post(body=_('审批请求已撤回。'))
+        self.message_post(
+            body=_('审批请求已被申请人 %s 撤回。') % self.env.user.name
+        )
+        self._send_push_notification('recalled')
+        self._sync_business_model('cancelled')
+
+    def action_cancel(self):
+        self.ensure_one()
+        if self.state not in ('draft', 'submitted'):
+            raise UserError(_('只有草稿或审批中的请求才能取消。'))
+
+        if self.state == 'submitted' and self.env.user != self.request_user_id \
+                and not self.env.user._is_admin():
+            raise UserError(_('只有申请人或管理员才能取消审批中的请求。'))
+
+        self.record_ids.filtered(lambda r: r.state == 'pending').write({
+            'state': 'cancelled',
+        })
+        self.write({
+            'state': 'cancelled',
+            'current_node_ids': [(5, 0, 0)],
+            'approved_date': fields.Datetime.now(),
+        })
+        self.message_post(body=_('审批请求已取消。'))
         self._sync_business_model('cancelled')
 
     def action_resubmit(self):
@@ -261,6 +322,182 @@ class ApprovalRequest(models.Model):
             body=_('%s 已完成办理【%s】节点。') % (handler.name, node.name)
         )
 
+    # ── 加签 ────────────────────────────────────────────────────
+
+    def action_countersign(self, user_id, position='after', comment=''):
+        """
+        加签：在当前审批节点添加额外审批人
+        :param user_id: 被加签的用户ID
+        :param position: 'before'(前加签) 或 'after'(后加签)
+        :param comment: 加签原因
+        """
+        self.ensure_one()
+        if self.state != 'submitted':
+            raise UserError(_('只有审批中的请求才能加签。'))
+
+        approver = self.env.user
+        active_record = self._get_user_active_record(approver)[:1]
+
+        if not active_record:
+            raise UserError(_('您没有待审批的节点，无法加签。'))
+
+        target_user = self.env['res.users'].browse(user_id)
+        if not target_user.exists():
+            raise UserError(_('目标用户不存在。'))
+        if target_user == approver:
+            raise UserError(_('不能给自己加签。'))
+
+        node = active_record.node_id
+        position_label = _('前加签') if position == 'before' else _('后加签')
+
+        # Create countersign record
+        cs = self.env['approval.countersign'].create({
+            'request_id': self.id,
+            'node_id': node.id,
+            'from_user_id': approver.id,
+            'to_user_id': target_user.id,
+            'position': position,
+            'comment': comment or '',
+            'state': 'pending',
+            'record_id': active_record.id,
+        })
+
+        # Create a new pending record for the countersigning user
+        new_record = self.env['approval.record'].create({
+            'request_id': self.id,
+            'node_id': node.id,
+            'approver_id': target_user.id,
+            'state': 'pending' if position == 'before' else 'waiting',
+            'record_type': 'approver',
+            'countersign_id': cs.id,
+        })
+
+        cs.write({'new_record_id': new_record.id})
+
+        # If 前加签 (before): 当前审批人暂停 → 加签人先审批
+        if position == 'before':
+            active_record.write({'state': 'waiting'})
+
+        self.message_post(
+            body=_('%(approver)s 对【%(node)s】节点进行了%(pos)s，加签人：%(target)s。原因：%(reason)s') % {
+                'approver': approver.name,
+                'node': node.name,
+                'pos': position_label,
+                'target': target_user.name,
+                'reason': comment or _('未说明'),
+            },
+            partner_ids=[target_user.partner_id.id, approver.partner_id.id],
+            message_type='notification',
+        )
+        self._send_push_notification('countersign', user_ids=[target_user.id])
+
+    def _get_user_delegate_record(self, user):
+        """获取用户作为委托审批人的待处理记录"""
+        return self.record_ids.filtered(
+            lambda r: r.record_type == 'approver'
+            and r.state == 'pending'
+            and r.node_id in self.current_node_ids
+            and r.delegate_from_id
+            and user in r.delegate_from_id.delegate_user_id
+        )[:1]
+
+    # ── 批量审批 ─────────────────────────────────────────────────
+
+    @api.model
+    def action_batch_approve(self, request_ids, comment=''):
+        """批量审批多个请求"""
+        requests = self.browse(request_ids)
+        if not requests:
+            raise UserError(_('请选择要审批的请求。'))
+
+        approved = []
+        errors = []
+        for req in requests:
+            try:
+                req.action_approve(comment=comment or _('批量审批通过'))
+                approved.append(req.name)
+            except UserError as e:
+                errors.append(f'{req.name}: {str(e)}')
+
+        msg = _('批量审批完成：通过 %d 个') % len(approved)
+        if errors:
+            msg += _('，失败 %d 个：\n%s') % (len(errors), '\n'.join(errors))
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('批量审批'),
+                'message': msg,
+                'type': 'success' if not errors else 'warning',
+                'sticky': True if errors else False,
+            }
+        }
+
+    @api.model
+    def action_batch_reject(self, request_ids, reason=''):
+        """批量驳回多个请求"""
+        requests = self.browse(request_ids)
+        if not requests:
+            raise UserError(_('请选择要驳回的请求。'))
+
+        rejected = []
+        errors = []
+        for req in requests:
+            try:
+                req.action_reject(reason=reason or _('批量驳回'))
+                rejected.append(req.name)
+            except UserError as e:
+                errors.append(f'{req.name}: {str(e)}')
+
+        msg = _('批量驳回完成：%d 个') % len(rejected)
+        if errors:
+            msg += _('，失败 %d 个：\n%s') % (len(errors), '\n'.join(errors))
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('批量驳回'),
+                'message': msg,
+                'type': 'success' if not errors else 'warning',
+                'sticky': True if errors else False,
+            }
+        }
+
+    # ── 委托 ──────────────────────────────────────────────────────
+
+    @api.model
+    def action_set_delegate(self, delegate_user_id):
+        """设置委托审批人"""
+        user = self.env.user
+        if not delegate_user_id:
+            user.write({'delegate_user_id': False})
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('委托审批'),
+                    'message': _('已取消委托。'),
+                    'type': 'info',
+                }
+            }
+
+        target = self.env['res.users'].browse(delegate_user_id)
+        if not target.exists():
+            raise UserError(_('目标用户不存在。'))
+
+        user.write({'delegate_user_id': target.id})
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('委托审批'),
+                'message': _('已将审批任务委托给 %s。') % target.name,
+                'type': 'success',
+            }
+        }
+
     # ── 内部：图遍历 ──────────────────────────────────────────
 
     def _get_start_nodes(self):
@@ -274,6 +511,18 @@ class ApprovalRequest(models.Model):
         )
 
     def _get_user_active_record(self, user):
+        # First check delegate records
+        delegate_records = self.record_ids.filtered(
+            lambda r: r.record_type == 'approver'
+            and r.state == 'pending'
+            and r.node_id in self.current_node_ids
+            and r.delegate_from_id
+            and user in r.delegate_from_id.delegate_user_id
+        )
+        if delegate_records:
+            return delegate_records
+
+        # Then check own records
         return self.record_ids.filtered(
             lambda r: r.record_type == 'approver'
             and r.approver_id == user
@@ -300,6 +549,20 @@ class ApprovalRequest(models.Model):
                 record_type = 'handler'
 
             for user in users:
+                # Check if user has a delegate set
+                delegate_id = False
+                if hasattr(user, 'delegate_user_id') and user.delegate_user_id:
+                    # Create records for both original and delegate
+                    self.env['approval.record'].create({
+                        'request_id': self.id,
+                        'node_id': node.id,
+                        'approver_id': user.delegate_user_id.id,
+                        'state': 'pending',
+                        'record_type': record_type,
+                        'delegate_from_id': user.id,
+                    })
+                    delegate_id = user.delegate_user_id
+
                 self.env['approval.record'].create({
                     'request_id': self.id,
                     'node_id': node.id,
@@ -343,6 +606,15 @@ class ApprovalRequest(models.Model):
             'completed_node_ids': [(4, node.id)],
         })
 
+        # If countersign after completed node, append to next nodes
+        pending_countersigns = self.countersign_ids.filtered(
+            lambda c: c.state == 'pending' and c.position == 'after' and c.record_id.node_id == node
+        )
+        for cs in pending_countersigns:
+            if cs.new_record_id and cs.new_record_id.state == 'waiting':
+                cs.new_record_id.write({'state': 'pending'})
+                cs.write({'state': 'done'})
+
         if node.node_type == 'condition':
             return
 
@@ -372,6 +644,8 @@ class ApprovalRequest(models.Model):
         node_records = self.record_ids.filtered(
             lambda r: r.node_id == node and r.record_type == 'approver'
         )
+        # Only count non-waiting records
+        node_records = node_records.filtered(lambda r: r.state != 'waiting')
         if node.sign_type == 'countersign':
             return all(r.state == 'approved' for r in node_records)
         elif node.sign_type == 'or_sign':
@@ -380,12 +654,16 @@ class ApprovalRequest(models.Model):
 
     def _cancel_node_pending_records(self, node):
         self.record_ids.filtered(
-            lambda r: r.node_id == node and r.state == 'pending'
+            lambda r: r.node_id == node and r.state in ('pending', 'waiting')
         ).write({'state': 'cancelled'})
 
     def _reject_all_pending(self):
         self.record_ids.filtered(
-            lambda r: r.state == 'pending'
+            lambda r: r.state in ('pending', 'waiting')
+        ).write({'state': 'cancelled'})
+        # Also cancel pending countersigns
+        self.countersign_ids.filtered(
+            lambda c: c.state == 'pending'
         ).write({'state': 'cancelled'})
         self._sync_business_model('rejected')
 
@@ -396,6 +674,7 @@ class ApprovalRequest(models.Model):
             'approved_date': fields.Datetime.now(),
         })
         self.message_post(body=_('🎉 审批全部通过！'))
+        self._send_push_notification('approved')
         self._sync_business_model('approved')
 
     def _sync_business_model(self, new_state):
@@ -428,6 +707,9 @@ class ApprovalRequest(models.Model):
                 partner_ids=[user.partner_id.id],
                 message_type='notification',
             )
+
+        # External push notification hook
+        self._send_push_notification(action_type, user_ids=users.ids)
 
     # ── 转交 / 催办 / 超时 ──────────────────────────────────────
 
@@ -462,6 +744,7 @@ class ApprovalRequest(models.Model):
             partner_ids=[target_user.partner_id.id],
             message_type='notification',
         )
+        self._send_push_notification('transfer', user_ids=[target_user.id])
 
     def action_urge(self):
         self.ensure_one()
@@ -483,9 +766,11 @@ class ApprovalRequest(models.Model):
                 partner_ids=[record.approver_id.partner_id.id],
                 message_type='notification',
             )
+            self._send_push_notification('urge', user_ids=[record.approver_id.id])
 
     @api.model
     def _cron_check_timeout(self):
+        """定时任务：检查超时审批并自动处理"""
         requests = self.search([('state', '=', 'submitted')])
         now = fields.Datetime.now()
 
@@ -497,21 +782,77 @@ class ApprovalRequest(models.Model):
                 if record.create_date:
                     elapsed = (now - record.create_date).total_seconds() / 3600
                     if elapsed >= record.node_id.timeout_hours:
-                        last_reminder = record.last_reminder_date
-                        if last_reminder:
-                            since_last = (now - last_reminder).total_seconds() / 3600
-                            if since_last < record.node_id.timeout_hours:
-                                continue
-                        req.message_post(
-                            body=_('超时提醒：%s 的【%s】节点已超时 %d 小时。') % (
-                                record.approver_id.name,
-                                record.node_id.name,
-                                int(elapsed),
-                            ),
-                            partner_ids=[record.approver_id.partner_id.id],
-                            message_type='notification',
-                        )
-                        record.write({'last_reminder_date': now})
+                        node = record.node_id
+                        # Auto-action based on node config
+                        if node.timeout_action == 'auto_approve':
+                            record.write({
+                                'state': 'approved',
+                                'comment': _('超时自动通过（%d小时未处理）') % int(elapsed),
+                                'approved_date': now,
+                            })
+                            req.message_post(
+                                body=_('%s 的【%s】节点超时 %d 小时，自动通过。') % (
+                                    record.approver_id.name, node.name, int(elapsed)
+                                )
+                            )
+                            if req._check_node_approved(node):
+                                req._complete_node(node)
+
+                        elif node.timeout_action == 'auto_reject':
+                            record.write({
+                                'state': 'rejected',
+                                'comment': _('超时自动驳回（%d小时未处理）') % int(elapsed),
+                                'approved_date': now,
+                            })
+                            req._reject_all_pending()
+                            req.write({
+                                'state': 'rejected',
+                                'current_node_ids': [(5, 0, 0)],
+                                'approved_date': now,
+                            })
+                            req.message_post(
+                                body=_('%s 的【%s】节点超时 %d 小时，自动驳回。') % (
+                                    record.approver_id.name, node.name, int(elapsed)
+                                )
+                            )
+                            req._send_push_notification('auto_rejected')
+
+                        else:
+                            # Just remind
+                            last_reminder = record.last_reminder_date
+                            if last_reminder:
+                                since_last = (now - last_reminder).total_seconds() / 3600
+                                if since_last < node.timeout_hours:
+                                    continue
+                            req.message_post(
+                                body=_('超时提醒：%s 的【%s】节点已超时 %d 小时。') % (
+                                    record.approver_id.name, node.name, int(elapsed),
+                                ),
+                                partner_ids=[record.approver_id.partner_id.id],
+                                message_type='notification',
+                            )
+                            record.write({'last_reminder_date': now})
+                            req._send_push_notification('timeout', user_ids=[record.approver_id.id])
+
+    # ── 推送通知钩子 ──────────────────────────────────────────
+
+    def _send_push_notification(self, event, user_ids=None):
+        """
+        外部平台推送通知钩子（企业微信/钉钉/邮件）
+        子模块（approval_cn_external）可重写此方法
+        """
+        # 基类默认不做任何外部推送
+        # 子模块通过继承重写此方法实现具体平台的推送
+        self.ensure_one()
+        if not user_ids:
+            user_ids = []
+
+        # 发送邮件通知（通过 mail.message）
+        # 外部平台推送由 approval_cn_external 模块处理
+        _logger.info(
+            '审批推送事件: request=%s, event=%s, users=%s',
+            self.name, event, user_ids
+        )
 
     # ── UI 动作 ────────────────────────────────────────────────
 
@@ -521,20 +862,63 @@ class ApprovalRequest(models.Model):
             'type': 'ir.actions.act_window',
             'name': '审批记录',
             'res_model': 'approval.record',
-            'view_mode': 'list,form',
+            'view_mode': 'tree,form',
             'domain': [('request_id', '=', self.id)],
         }
 
-    def unlink(self):
-        """禁止删除已审批通过的请求"""
-        for record in self:
-            if record.state == 'approved':
-                from odoo.exceptions import UserError
-                from odoo import _
-                raise UserError(
-                    _('审批单 %s 已审批通过，不允许删除。') % record.name
-                )
-        return super().unlink()
+    def action_view_countersigns(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': '加签记录',
+            'res_model': 'approval.countersign',
+            'view_mode': 'tree,form',
+            'domain': [('request_id', '=', self.id)],
+        }
+
+    def action_view_timeline(self):
+        """返回审批时间线数据"""
+        self.ensure_one()
+        timeline = []
+        # Submission
+        timeline.append({
+            'date': self.request_date,
+            'event': 'submitted',
+            'label': _('提交审批'),
+            'user': self.request_user_id.name,
+        })
+        # Records
+        for rec in self.record_ids.sorted('create_date'):
+            if rec.state == 'approved':
+                label = _('审批通过')
+            elif rec.state == 'rejected':
+                label = _('审批驳回')
+            elif rec.state == 'cancelled':
+                label = _('已取消')
+            elif rec.state == 'waiting':
+                label = _('等待加签')
+            else:
+                label = _('待处理')
+            timeline.append({
+                'date': rec.approved_date or rec.create_date,
+                'event': rec.state,
+                'label': f'{rec.node_id.name} - {label}',
+                'user': rec.approver_id.name,
+                'comment': rec.comment,
+            })
+        # Countersigns
+        for cs in self.countersign_ids:
+            pos = _('前加签') if cs.position == 'before' else _('后加签')
+            timeline.append({
+                'date': cs.create_date,
+                'event': 'countersign',
+                'label': f'{pos}：{cs.from_user_id.name} → {cs.to_user_id.name}',
+                'user': cs.from_user_id.name,
+                'comment': cs.comment,
+            })
+        # Sort
+        timeline.sort(key=lambda x: x['date'] or '')
+        return timeline
 
     def action_view_cc(self):
         self.ensure_one()
@@ -545,3 +929,12 @@ class ApprovalRequest(models.Model):
             'view_mode': 'tree,form',
             'domain': [('request_id', '=', self.id)],
         }
+
+    def unlink(self):
+        """禁止删除已审批通过的请求"""
+        for record in self:
+            if record.state == 'approved':
+                raise UserError(
+                    _('审批单 %s 已审批通过，不允许删除。') % record.name
+                )
+        return super().unlink()
