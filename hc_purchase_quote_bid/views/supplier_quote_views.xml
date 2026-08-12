@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- 供应商报价表单 -->
+    <record id="view_supplier_quote_form" model="ir.ui.view">
+        <field name="name">hc.supplier.quote.form</field>
+        <field name="model">hc.supplier.quote</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_submit" type="object"
+                            string="确认录入" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <field name="state" widget="badge"
+                           decoration-warning="state=='draft'"
+                           decoration-info="state=='submitted'"
+                           decoration-success="state=='accepted'"
+                           decoration-muted="state=='rejected'"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="rfq_id" readonly="1"/>
+                            <field name="partner_id" readonly="state != 'draft'"/>
+                            <field name="quote_date" readonly="state != 'draft'"/>
+                            <field name="quote_source" readonly="state != 'draft'"/>
+                        </group>
+                        <group>
+                            <field name="entered_by" readonly="1"/>
+                            <field name="invoice_type" readonly="state != 'draft'"/>
+                            <field name="has_certificate" readonly="state != 'draft'"/>
+                            <field name="has_stamped_quote" readonly="state != 'draft'"/>
+                            <field name="total_amount" widget="monetary" readonly="1"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+
+                    <!-- 询价单产品摘要（只读参考） -->
+                    <separator string="询价单产品清单（录入报价时参考）" invisible="not rfq_id"/>
+                    <div invisible="not rfq_id" style="width:100%; overflow-x:auto">
+                        <field name="rfq_product_summary" nolabel="1" widget="html"/>
+                    </div>
+
+                    <group string="报价明细">
+                        <field name="line_ids" nolabel="1">
+                            <list editable="bottom">
+                                <field name="product_id" required="1"
+                                       readonly="parent.state != 'draft'"/>
+                                <field name="product_uom_id" required="1"
+                                       readonly="parent.state != 'draft'"/>
+                                <field name="brand"
+                                       readonly="parent.state != 'draft'"/>
+                                <field name="tax_rate"
+                                       readonly="parent.state != 'draft'"/>
+                                <field name="unit_price" widget="monetary"
+                                       readonly="parent.state != 'draft'"/>
+                                <field name="quantity"
+                                       readonly="parent.state != 'draft'"/>
+                                <field name="delivery_date"
+                                       readonly="parent.state != 'draft'"/>
+                                <field name="warranty_months"
+                                       readonly="parent.state != 'draft'"/>
+                                <field name="total_amount" widget="monetary" readonly="1"/>
+                                <field name="note"
+                                       readonly="parent.state != 'draft'"/>
+                            </list>
+                        </field>
+                    </group>
+
+                    <group string="供应商附件">
+                        <field name="attachment_ids" widget="many2many_binary"/>
+                    </group>
+
+                    <group string="供应商说明">
+                        <field name="note" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- 比价单表单 -->
+    <record id="view_bid_comparison_form" model="ir.ui.view">
+        <field name="name">hc.bid.comparison.form</field>
+        <field name="model">hc.bid.comparison</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_generate_comparison" type="object"
+                            string="生成比价矩阵" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_recommend" type="object"
+                            string="推荐供应商并提交审批" class="btn-primary"
+                            invisible="state != 'compared'"/>
+                    <button name="action_submit_approval" type="object"
+                            string="重新提交审批" class="btn-primary"
+                            invisible="state != 'rejected'"/>
+                    <button name="action_view_approval" type="object"
+                            string="查看审批" class="btn-secondary"
+                            invisible="not approval_request_id"/>
+                    <button name="button_cancel" type="object"
+                            string="撤回审批" class="btn-secondary"
+                            invisible="state != 'submitted'"/>
+                    <button name="button_draft" type="object"
+                            string="退回草稿" class="btn-secondary"
+                            invisible="state != 'rejected'"/>
+                    <button name="action_confirm_award" type="object"
+                            string="确认定标" class="btn-primary"
+                            invisible="state != 'approved'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,compared,submitted,approved"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="rfq_id" readonly="1"/>
+                            <field name="company_id" readonly="1"/>
+                            <field name="department_id" readonly="1"/>
+                            <field name="flow_id"
+                                   invisible="state != 'draft'"
+                                   options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="winner_partner_ids"
+                                   widget="many2many_tags"
+                                   invisible="state == 'draft'"
+                                   readonly="1"/>
+                            <field name="recommend_reason"
+                                   widget="text"
+                                   invisible="state == 'draft'"
+                                   readonly="state in ('submitted', 'approved')"
+                                   placeholder="请说明推荐理由，如：价格最低、交货最快、品质最优等"/>
+                        </group>
+                    </group>
+
+                    <group string="比价矩阵">
+                        <field name="line_ids" nolabel="1">
+                            <list editable="bottom">
+                                <field name="product_id" readonly="1" width="280px"/>
+                                <field name="partner_id" readonly="1" width="180px"/>
+                                <field name="quantity" readonly="1" width="70px"/>
+                                <field name="product_uom_id" readonly="1" width="60px" optional="hide"/>
+                                <field name="is_winner" string="中标"
+                                       widget="boolean_toggle"
+                                       readonly="parent.state in ('submitted', 'approved')"
+                                       width="60px"/>
+                                <field name="unit_price" widget="monetary"
+                                       readonly="parent.state in ('submitted', 'approved')"
+                                       width="110px"/>
+                                <field name="total_amount" widget="monetary" width="120px"/>
+                                <field name="brand"
+                                       readonly="parent.state in ('submitted', 'approved')"
+                                       optional="hide"/>
+                                <field name="tax_rate"
+                                       readonly="parent.state in ('submitted', 'approved')"
+                                       width="80px"/>
+                                <field name="delivery_date"
+                                       readonly="parent.state in ('submitted', 'approved')"
+                                       optional="hide"/>
+                                <field name="warranty_months"
+                                       readonly="parent.state in ('submitted', 'approved')"
+                                       optional="hide"/>
+                                <field name="winner_comment" string="备注"
+                                       readonly="parent.state in ('submitted', 'approved')"
+                                       optional="hide"/>
+                            </list>
+                        </field>
+                    </group>
+                </sheet>
+                <div class="o_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- 采购订单表单扩展 -->
+    <record id="purchase_order_form_inherit_quote" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.quote</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- 顶部按钮区域：报价/比价 -->
+            <xpath expr="//header" position="inside">
+                <button name="action_add_quote" type="object"
+                        string="录入供应商报价" class="btn-primary"
+                        invisible="state not in ('draft', 'sent') or has_approved_bid_comparison"/>
+                <button name="action_create_bid_comparison" type="object"
+                        string="比价定标" class="btn-primary"
+                        invisible="state not in ('draft', 'sent') or quote_count == 0 or bid_count > 0"/>
+                <button name="action_view_bid_comparisons" type="object"
+                        string="查看比价" class="btn-primary"
+                        invisible="state not in ('draft', 'sent') or bid_count == 0"/>
+            </xpath>
+
+            <!-- stat button -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_requisition" type="object"
+                        class="o_stat_button" icon="fa-pencil-square-o"
+                        invisible="not has_requisition">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">请购单</span>
+                        <span class="o_stat_value" invisible="not hc_requisition_id">
+                            <field name="hc_requisition_id" readonly="1" nolabel="1"/>
+                        </span>
+                    </div>
+                </button>
+                <button name="action_view_related_bid" type="object"
+                        class="o_stat_button" icon="fa-balance-scale"
+                        invisible="not bid_comparison_id">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">来源比价</span>
+                        <span class="o_stat_value">
+                            <field name="bid_comparison_id" readonly="1" nolabel="1"/>
+                        </span>
+                    </div>
+                </button>
+                <button name="action_view_related_quote" type="object"
+                        class="o_stat_button" icon="fa-file-text-o"
+                        invisible="not has_related_quote">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">供应商报价</span>
+                        <span class="o_stat_value">
+                            <field name="related_quote_id" readonly="1" nolabel="1"/>
+                        </span>
+                    </div>
+                </button>
+                <button name="action_view_quotes" type="object"
+                        class="o_stat_button" icon="fa-file-text-o">
+                    <field name="quote_count" widget="statinfo" string="报价"/>
+                </button>
+                <button name="action_view_bid_comparisons" type="object"
+                        class="o_stat_button" icon="fa-balance-scale">
+                    <field name="bid_count" widget="statinfo" string="比价"/>
+                </button>
+            </xpath>
+
+            <!-- 隐藏字段 -->
+            <xpath expr="//sheet" position="inside">
+                <field name="quote_count" invisible="1"/>
+                <field name="bid_count" invisible="1"/>
+                <field name="has_approved_bid_comparison" invisible="1"/>
+                <field name="has_requisition" invisible="1"/>
+                <field name="bid_comparison_id" invisible="1"/>
+                <field name="related_quote_id" invisible="1"/>
+                <field name="has_related_quote" invisible="1"/>
+            </xpath>
+
+            <!-- 供应商报价 tab -->
+            <xpath expr="//notebook" position="inside">
+                <page string="供应商报价">
+                    <field name="supplier_quote_ids">
+                        <list>
+                            <field name="partner_id"/>
+                            <field name="quote_date"/>
+                            <field name="total_amount" widget="monetary"/>
+                            <field name="invoice_type"/>
+                            <field name="state" widget="badge"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+
+        </field>
+    </record>
+
+    <!-- 采购订单审批按钮：比价定标已批准后隐藏提交审批按钮 -->
+    <record id="purchase_order_form_inherit_approval_hide_submit" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.approval.hide.submit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="approval_cn_purchase.purchase_order_form_inherit_approval"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_submit_approval']" position="attributes">
+                <attribute name="invisible">state != 'draft' or approval_request_id or has_approved_bid_comparison or bid_count > 0</attribute>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
