@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- 审批请求表单：当审批来源为采购合同时，添加查看合同按钮 -->
+    <record id="view_approval_request_form_contract" model="ir.ui.view">
+        <field name="name">approval.request.form.contract</field>
+        <field name="model">approval.request</field>
+        <field name="inherit_id"
+               ref="approval_cn.view_approval_request_form"/>
+        <field name="arch" type="xml">
+
+            <!-- 在 header 添加查看合同 / 下载合同按钮 -->
+            <xpath expr="//header" position="inside">
+                <button name="action_view_source_contract" type="object"
+                        string="查看合同" class="btn-primary"
+                        invisible="model_name != 'hc.purchase.contract'"/>
+                <button name="action_download_contract_file" type="object"
+                        string="下载合同文件" class="btn-secondary"
+                        invisible="model_name != 'hc.purchase.contract'"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
