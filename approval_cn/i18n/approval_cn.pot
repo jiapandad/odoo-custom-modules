@@ -1,0 +1,106 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* approval_cn
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-13 00:00+0000\n"
+"PO-Revision-Date: 2026-05-13 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: approval_cn
+#: model:ir.model.fields,field_description:approval_cn.field_approval_category__name
+msgid "审批类型"
+msgstr ""
+
+#. module: approval_cn
+#: model:ir.model.fields,field_description:approval_cn.field_approval_request__name
+msgid "审批请求"
+msgstr ""
+
+#. module: approval_cn
+#: model:ir.model.fields,field_description:approval_cn.field_approval_flow__name
+msgid "审批流程"
+msgstr ""
+
+#. module: approval_cn
+#: model:ir.model.fields,field_description:approval_cn.field_approval_node__name
+msgid "审批节点"
+msgstr ""
+
+#. module: approval_cn
+#: model:ir.model.fields,field_description:approval_cn.field_approval_record__name
+msgid "审批记录"
+msgstr ""
+
+#. module: approval_cn
+#: model:ir.model.fields,field_description:approval_cn.field_approval_cc__name
+msgid "抄送记录"
+msgstr ""
+
+#. module: approval_cn
+#: model:ir.model.fields,field_description:approval_cn.field_approval_condition_line__name
+msgid "条件规则"
+msgstr ""
+
+#. module: approval_cn
+#: model:ir.model.fields,field_description:approval_cn.field_approval_form_field__name
+msgid "表单字段"
+msgstr ""
+
+#. module: approval_cn
+#: model:res.groups,name:approval_cn.group_approval_admin
+msgid "审批管理员"
+msgstr ""
+
+#. module: approval_cn
+#: model:res.groups,name:approval_cn.group_approval_user
+msgid "审批用户"
+msgstr ""
+
+#. module: approval_cn
+#: model_terms:ir.ui.view,arch_db:approval_cn.view_approval_request_form
+msgid "提交审批"
+msgstr ""
+
+#. module: approval_cn
+#: model_terms:ir.ui.view,arch_db:approval_cn.view_approval_request_form
+msgid "审批通过"
+msgstr ""
+
+#. module: approval_cn
+#: model_terms:ir.ui.view,arch_db:approval_cn.view_approval_request_form
+msgid "驳回"
+msgstr ""
+
+#. module: approval_cn
+#: model_terms:ir.ui.view,arch_db:approval_cn.view_approval_request_form
+msgid "转交"
+msgstr ""
+
+#. module: approval_cn
+#: model_terms:ir.ui.view,arch_db:approval_cn.view_approval_request_form
+msgid "完成办理"
+msgstr ""
+
+#. module: approval_cn
+#: model_terms:ir.ui.view,arch_db:approval_cn.view_approval_request_form
+msgid "催办"
+msgstr ""
+
+#. module: approval_cn
+#: model_terms:ir.ui.view,arch_db:approval_cn.view_approval_request_form
+msgid "撤回"
+msgstr ""
+
+#. module: approval_cn
+#: model_terms:ir.ui.view,arch_db:approval_cn.view_approval_request_form
+msgid "重新提交"
+msgstr ""
