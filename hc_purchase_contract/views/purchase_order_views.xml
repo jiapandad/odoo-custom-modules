@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- 在采购订单表单的 button_box 区域显示采购合同入口 -->
+    <record id="view_purchase_order_form_contract" model="ir.ui.view">
+        <field name="name">purchase.order.form.contract</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_open_contract" type="object"
+                        class="oe_stat_button" icon="fa-file-text-o">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">采购合同</span>
+                        <field name="contract_button_label" class="o_stat_value"/>
+                    </div>
+                </button>
+            </xpath>
+
+            <!-- 在其他信息区域显示合同字段，允许手动关联 -->
+            <xpath expr="//group[@name='other_info']" position="inside">
+                <group>
+                    <field name="hc_contract_id" string="采购合同"
+                           options="{'no_create': True}"/>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
