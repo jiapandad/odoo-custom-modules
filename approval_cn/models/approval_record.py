@@ -29,11 +29,20 @@ class ApprovalRecord(models.Model):
         ('approved', '已通过'),
         ('rejected', '已驳回'),
         ('cancelled', '已取消'),
+        ('waiting', '等待中'),
     ], string='状态', default='pending', index=True,
     )
     comment = fields.Text(string='处理意见')
     approved_date = fields.Datetime(string='处理时间')
     last_reminder_date = fields.Datetime(string='最近提醒时间')
+    delegate_from_id = fields.Many2one(
+        'res.users', string='委托来源',
+        help='此记录是因为谁的委托而创建的',
+    )
+    countersign_id = fields.Many2one(
+        'approval.countersign', string='加签记录',
+        ondelete='set null',
+    )
     display_name = fields.Char(
         string='显示名称', compute='_compute_display_name',
     )
