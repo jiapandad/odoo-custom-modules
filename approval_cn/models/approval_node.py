@@ -114,6 +114,13 @@ class ApprovalNode(models.Model):
 
     # ── 通用配置 ──
     required = fields.Boolean(string='必须处理', default=True)
+    timeout_action = fields.Selection([
+        ('remind', '仅提醒'),
+        ('auto_approve', '自动通过'),
+        ('auto_reject', '自动驳回'),
+    ], string='超时处理', default='remind',
+       help='超过时限后的自动处理方式',
+    )
     timeout_hours = fields.Integer(
         string='超时提醒（小时）', default=0,
         help='超过此时间未处理将发送提醒，0表示不提醒',
