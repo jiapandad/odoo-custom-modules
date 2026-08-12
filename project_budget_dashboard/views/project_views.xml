@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="project_form_budget_dashboard" model="ir.ui.view">
+        <field name="name">project.form.budget.dashboard</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="项目预算" name="budget_dashboard">
+                    <group>
+                        <group string="预算设置">
+                            <field name="budget_amount" widget="monetary" placeholder="输入项目总预算"/>
+                        </group>
+                        <group string="预算使用">
+                            <field name="purchase_cost" widget="monetary" string="采购花费"/>
+                            <field name="bill_cost" widget="monetary" string="供应商账单"/>
+                            <field name="other_cost" widget="monetary" string="其他费用（工时/报销）"/>
+                            <field name="total_cost" widget="monetary" string="总花费"/>
+                            <field name="remaining_budget" widget="monetary" string="剩余预算"/>
+                            <field name="budget_percent_used" widget="percentage" string="使用率"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
