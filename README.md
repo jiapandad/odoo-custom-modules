@@ -100,3 +100,8 @@ odoo -d <db_name> -c /etc/odoo/odoo.conf -u all --stop-after-init
 ## 授权
 
 本项目各模块遵循其原始授权（LGPL-3 / AGPL-3）。
+
+如果觉得项目可以就打赏一杯咖啡吧。
+<img width="1155" height="1573" alt="mm_facetoface_collect_qrcode_1786513184608" src="https://github.com/user-attachments/assets/42d85312-0d26-4424-bea8-b4ede35a5e65" />
+<img width="1080" height="1620" alt="1786513278919" src="https://github.com/user-attachments/assets/f7d654dc-774b-4082-8e32-cf3584240b99" />
+
