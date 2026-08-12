@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_approval_category_tree" model="ir.ui.view">
+        <field name="name">approval.category.tree</field>
+        <field name="model">approval.category</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="model_name"/>
+                <field name="request_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_approval_category_form" model="ir.ui.view">
+        <field name="name">approval.category.form</field>
+        <field name="model">approval.category</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="o_button_box" name="button_box">
+                        <button name="action_view_requests"
+                                type="object" class="o_stat_button"
+                                icon="fa-list">
+                            <field name="request_count" widget="statinfo"
+                                   string="审批请求"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon"
+                            title="已归档" bg_color="bg-danger"
+                            invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                        </group>
+                        <group>
+                            <field name="model_name"/>
+                            <field name="sequence"/>
+                        </group>
+                    </group>
+                    <group string="描述">
+                        <field name="description" nolabel="1"
+                               placeholder="请描述此审批类型的用途..."/>
+                    </group>
+                    <field name="active" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_approval_category_search" model="ir.ui.view">
+        <field name="name">approval.category.search</field>
+        <field name="model">approval.category</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="model_name"/>
+                <filter name="active_filter" string="已启用"
+                        domain="[('active', '=', True)]"/>
+                <separator/>
+                <filter name="inactive_filter" string="已归档"
+                        domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+</odoo>
