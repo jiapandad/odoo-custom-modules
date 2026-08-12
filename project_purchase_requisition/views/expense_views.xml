@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="hr_expense_form_add_project" model="ir.ui.view">
+        <field name="name">hr.expense.form.add.project</field>
+        <field name="model">hr.expense</field>
+        <field name="inherit_id" eval="2095"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='analytic_distribution']" position="before">
+                <field name="project_id"
+                       string="关联项目"
+                       options="{'no_create': True, 'no_open': True}"
+                       placeholder="选择费用归属的项目"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
