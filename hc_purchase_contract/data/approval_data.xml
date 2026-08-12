@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- 合同编号序列号 -->
+        <record id="seq_purchase_contract" model="ir.sequence">
+            <field name="name">采购合同号</field>
+            <field name="code">hc.purchase.contract</field>
+            <field name="implementation">standard</field>
+            <field name="prefix">HT/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+        </record>
+
+        <!-- 采购合同审批类型 -->
+        <record id="approval_category_purchase_contract" model="approval.category">
+            <field name="name">采购合同审批</field>
+            <field name="code">purchase_contract</field>
+            <field name="model_name">hc.purchase.contract</field>
+            <field name="active">True</field>
+            <field name="sequence">25</field>
+        </record>
+
+        <!-- 默认审批流程 -->
+        <record id="approval_flow_contract_default" model="approval.flow">
+            <field name="name">采购合同审批（默认）</field>
+            <field name="category_id" ref="approval_category_purchase_contract"/>
+            <field name="is_default">True</field>
+            <field name="condition_type">always</field>
+            <field name="sequence">10</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="approval_node_contract_direct_manager" model="approval.node">
+            <field name="flow_id" ref="approval_flow_contract_default"/>
+            <field name="name">直属上级审批</field>
+            <field name="sequence">10</field>
+            <field name="node_type">approver</field>
+            <field name="sign_type">or_sign</field>
+            <field name="approver_type">direct_manager</field>
+            <field name="required">True</field>
+        </record>
+
+    </data>
+</odoo>
