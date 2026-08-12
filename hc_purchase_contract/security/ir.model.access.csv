@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hc_purchase_contract_user,Purchase Contract User,model_hc_purchase_contract,base.group_user,1,1,1,1
+access_hc_purchase_contract_line_user,Purchase Contract Line User,model_hc_purchase_contract_line,base.group_user,1,1,1,1
