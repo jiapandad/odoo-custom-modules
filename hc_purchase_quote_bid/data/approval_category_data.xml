@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- 比价定标审批类型 -->
+        <record id="approval_category_bid_award" model="approval.category">
+            <field name="name">比价定标审批</field>
+            <field name="code">bid_award</field>
+            <field name="model_name">hc.bid.comparison</field>
+            <field name="active">True</field>
+            <field name="sequence">20</field>
+        </record>
+
+        <!-- 默认审批流程：直属上级审批 -->
+        <record id="approval_flow_bid_award_default" model="approval.flow">
+            <field name="name">比价定标审批（默认）</field>
+            <field name="category_id" ref="approval_category_bid_award"/>
+            <field name="is_default">True</field>
+            <field name="condition_type">always</field>
+            <field name="sequence">10</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- 审批节点：直属上级审批 -->
+        <record id="approval_node_bid_award_direct_manager" model="approval.node">
+            <field name="flow_id" ref="approval_flow_bid_award_default"/>
+            <field name="name">直属上级审批</field>
+            <field name="sequence">10</field>
+            <field name="node_type">approver</field>
+            <field name="sign_type">or_sign</field>
+            <field name="approver_type">direct_manager</field>
+            <field name="required">True</field>
+        </record>
+    </data>
+</odoo>
