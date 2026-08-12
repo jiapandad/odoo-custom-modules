@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_quote_bid_root"
+              name="采购比价"
+              parent="purchase.menu_purchase_root"
+              sequence="6"/>
+
+    <menuitem id="menu_supplier_quote"
+              name="供应商报价"
+              parent="menu_quote_bid_root"
+              action="action_supplier_quote"
+              sequence="10"/>
+
+    <menuitem id="menu_bid_comparison"
+              name="比价单"
+              parent="menu_quote_bid_root"
+              action="action_bid_comparison"
+              sequence="20"/>
+
+</odoo>
