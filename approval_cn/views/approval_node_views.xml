@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_approval_node_tree" model="ir.ui.view">
+        <field name="name">approval.node.tree</field>
+        <field name="model">approval.node</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="flow_id"/>
+                <field name="node_type"/>
+                <field name="sign_type" optional="hide"/>
+                <field name="approver_type" optional="hide"/>
+                <field name="approver_ids" widget="many2many_tags" optional="hide"/>
+                <field name="required"/>
+                <field name="timeout_hours"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_approval_node_form" model="ir.ui.view">
+        <field name="name">approval.node.form</field>
+        <field name="model">approval.node</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="flow_id"/>
+                            <field name="name"/>
+                            <field name="sequence"/>
+                            <field name="node_type"/>
+                        </group>
+                        <group>
+                            <field name="required"/>
+                            <field name="timeout_hours"/>
+                            <field name="can_edit"/>
+                        </group>
+                    </group>
+
+                    <group string="流程连接" colspan="4">
+                        <group colspan="2">
+                            <field name="parent_ids" widget="many2many_tags"
+                                   domain="[('flow_id', '=', flow_id), ('id', '!=', id)]"/>
+                        </group>
+                        <group colspan="2">
+                            <field name="child_ids" widget="many2many_tags"
+                                   domain="[('flow_id', '=', flow_id), ('id', '!=', id)]"/>
+                        </group>
+                    </group>
+
+                    <group string="审批人配置"
+                           invisible="node_type != 'approver'">
+                        <group>
+                            <field name="sign_type"/>
+                            <field name="approver_type"/>
+                        </group>
+                        <group>
+                            <field name="approver_ids" widget="many2many_tags"
+                                   invisible="approver_type != 'specific_user'"
+                                   required="approver_type == 'specific_user'"/>
+                            <field name="approver_group_ids" widget="many2many_tags"
+                                   invisible="approver_type != 'specific_group'"
+                                   required="approver_type == 'specific_group'"/>
+                        </group>
+                    </group>
+
+                    <group string="办理人配置"
+                           invisible="node_type != 'handler'">
+                        <group>
+                            <field name="handler_type"/>
+                        </group>
+                        <group>
+                            <field name="handler_ids" widget="many2many_tags"
+                                   invisible="handler_type != 'specific_user'"/>
+                            <field name="handler_group_ids" widget="many2many_tags"
+                                   invisible="handler_type != 'specific_group'"/>
+                        </group>
+                    </group>
+
+                    <group string="抄送人配置"
+                           invisible="node_type != 'cc'">
+                        <group>
+                            <field name="cc_type"/>
+                        </group>
+                        <group>
+                            <field name="cc_ids" widget="many2many_tags"
+                                   invisible="cc_type != 'specific_user'"/>
+                            <field name="cc_group_ids" widget="many2many_tags"
+                                   invisible="cc_type != 'specific_group'"/>
+                        </group>
+                    </group>
+
+                    <group string="条件分支规则"
+                           invisible="node_type != 'condition'">
+                        <group colspan="2">
+                            <field name="default_child_id"
+                                   domain="[('flow_id', '=', flow_id), ('id', '!=', id)]"/>
+                        </group>
+                    </group>
+                    <group string="条件规则列表"
+                           invisible="node_type != 'condition'"
+                           groups="approval_cn.group_approval_admin">
+                        <field name="condition_lines" nolabel="1"
+                               context="{'default_node_id': id}">
+                            <list editable="bottom">
+                                <field name="sequence" widget="handle"/>
+                                <field name="name"/>
+                                <field name="condition_type"/>
+                                <field name="condition_amount" optional="hide"/>
+                                <field name="condition_amount_min" optional="hide"/>
+                                <field name="condition_amount_max" optional="hide"/>
+                                <field name="condition_department_id" optional="hide"/>
+                                <field name="condition_expression" optional="hide"/>
+                                <field name="next_node_ids"
+                                       widget="many2many_tags"
+                                       domain="[('flow_id', '=', parent.flow_id), ('id', '!=', parent.id)]"/>
+                            </list>
+                        </field>
+                    </group>
+
+                    <group string="审批表单字段" groups="approval_cn.group_approval_admin">
+                        <field name="form_field_ids" nolabel="1"
+                               context="{'default_node_id': id}">
+                            <list editable="bottom">
+                                <field name="sequence" widget="handle"/>
+                                <field name="name"/>
+                                <field name="field_type"/>
+                                <field name="required"/>
+                                <field name="placeholder"/>
+                            </list>
+                        </field>
+                    </group>
+
+                    <field name="active" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_approval_node_search" model="ir.ui.view">
+        <field name="name">approval.node.search</field>
+        <field name="model">approval.node</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="flow_id"/>
+                <field name="node_type"/>
+                <field name="sign_type"/>
+                <field name="approver_type"/>
+                <filter name="type_approver" string="审批人节点"
+                        domain="[('node_type', '=', 'approver')]"/>
+                <filter name="type_cc" string="抄送人节点"
+                        domain="[('node_type', '=', 'cc')]"/>
+                <filter name="type_condition" string="条件分支节点"
+                        domain="[('node_type', '=', 'condition')]"/>
+                <filter name="type_handler" string="办理人节点"
+                        domain="[('node_type', '=', 'handler')]"/>
+            </search>
+        </field>
+    </record>
+</odoo>
