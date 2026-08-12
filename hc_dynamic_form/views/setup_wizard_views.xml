@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- 一键配置审批向导 -->
+    <record id="view_setup_wizard_form" model="ir.ui.view">
+        <field name="name">hc.approval.setup.wizard.form</field>
+        <field name="model">hc.approval.setup.wizard</field>
+        <field name="arch" type="xml">
+            <form string="一键配置审批类型和流程">
+                <div class="alert alert-info" role="alert">
+                    <p>填写以下信息，系统会一次性创建：</p>
+                    <ul>
+                        <li>1 个<b>审批类型</b></li>
+                        <li>1 个<b>审批流程</b>（默认启用）</li>
+                        <li>多个<b>审批节点</b>（按级别分配审批人）</li>
+                    </ul>
+                    <p class="text-muted">点击"一键创建"按钮将自动完成所有配置。</p>
+                </div>
+                <group>
+                    <group string="审批类型">
+                        <field name="name" placeholder="如：付款申请"/>
+                        <field name="code" placeholder="如：payment_request"
+                               help="英文唯一标识，系统会检查不重复"/>
+                        <field name="model_name"
+                               help="触发此审批的业务模型"/>
+                        <field name="description" placeholder="可选：描述"/>
+                    </group>
+                    <group string="审批流程">
+                        <field name="flow_name" placeholder="留空则自动命名"/>
+                        <field name="node_count" string="节点数量（1-10）"/>
+                        <field name="approver_ids"
+                               widget="many2many_tags"
+                               placeholder="留空则按顺序选系统用户"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_create" type="object"
+                            string="一键创建" class="btn-primary"/>
+                    <button string="取消" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_setup_wizard" model="ir.actions.act_window">
+        <field name="name">一键配置审批</field>
+        <field name="res_model">hc.approval.setup.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_setup_wizard_form"/>
+    </record>
+
+    <!-- 菜单：配置 → 一键配置审批 -->
+    <menuitem id="menu_setup_wizard"
+              name="一键配置审批"
+              parent="approval_cn.menu_approval_cn_config"
+              action="action_setup_wizard"
+              sequence="1"/>
+
+</odoo>
