@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_external_user_tree" model="ir.ui.view">
+        <field name="name">approval.external.user.tree</field>
+        <field name="model">approval.external.user</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="user_id" required="1"/>
+                <field name="external_user_id" required="1"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_external_config_form" model="ir.ui.view">
+        <field name="name">approval.external.config.form</field>
+        <field name="model">approval.external.config</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="platform"/>
+                        <field name="active"/>
+                    </group>
+                    <group string="API凭证">
+                        <field name="corp_id"/>
+                        <field name="agent_id"/>
+                        <field name="secret" password="True"/>
+                    </group>
+                    <group string="回调配置">
+                        <field name="token"/>
+                        <field name="encoding_aes_key"/>
+                    </group>
+                    <group string="用户映射">
+                        <field name="user_mapping_ids" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_external_config_tree" model="ir.ui.view">
+        <field name="name">approval.external.config.list</field>
+        <field name="model">approval.external.config</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="platform"/>
+                <field name="corp_id"/>
+                <field name="active"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_external_config_search" model="ir.ui.view">
+        <field name="name">approval.external.config.search</field>
+        <field name="model">approval.external.config</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="platform"/>
+                <filter name="active" string="已启用"
+                        domain="[('active', '=', True)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_external_config" model="ir.actions.act_window">
+        <field name="name">外部平台配置</field>
+        <field name="res_model">approval.external.config</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>
