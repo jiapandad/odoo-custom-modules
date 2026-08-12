@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="purchase_order_form_inherit_requisition" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.requisition</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- 显示需求组织、申请人、需求部门（只读，来自来源请购单） -->
+            <xpath expr="//group[1]/group[1]" position="inside">
+                <field name="company_id" readonly="1"/>
+                <field name="hc_requisition_id" readonly="1" invisible="not hc_requisition_id"/>
+                <field name="hc_requisition_applicant_id" readonly="1" invisible="not hc_requisition_id"/>
+                <field name="hc_requisition_department_id" readonly="1" invisible="not hc_requisition_id"/>
+            </xpath>
+
+            <!-- 禁止在 order_line 列表里手动添加/删除行 -->
+            <xpath expr="//field[@name='order_line']" position="attributes">
+                <attribute name="create">0</attribute>
+                <attribute name="delete">0</attribute>
+            </xpath>
+
+            <!-- 移除"添加产品" 和 "目录" 按钮 -->
+            <xpath expr="//field[@name='order_line']/list/control/create[@name='add_product_control']" position="replace"/>
+            <xpath expr="//field[@name='order_line']/list/control/button[@name='action_add_from_catalog']" position="replace"/>
+
+            <!-- 让单位列对所有人可见 -->
+            <xpath expr="//field[@name='order_line']/list/field[@name='product_uom_id']" position="attributes">
+                <attribute name="groups"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>
