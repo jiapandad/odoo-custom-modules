@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- 请购单菜单动作 -->
+    <record id="action_purchase_requisition" model="ir.actions.act_window">
+        <field name="name">请购单</field>
+        <field name="res_model">hc.purchase.requisition</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_my_requests': 0}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                创建新的请购单
+            </p>
+            <p>
+                请购单用于提交物料采购需求，审批通过后将自动生成采购任务。
+            </p>
+        </field>
+    </record>
+
+    <!-- 菜单 -->
+    <menuitem id="menu_purchase_requisition_root"
+              name="采购申请"
+              parent="purchase.menu_purchase_root"
+              sequence="5"/>
+
+    <menuitem id="menu_purchase_requisition"
+              name="请购单"
+              parent="menu_purchase_requisition_root"
+              action="action_purchase_requisition"
+              sequence="10"/>
+
+</odoo>
