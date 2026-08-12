@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_approval_external_root"
+              name="外部审批集成"
+              parent="approval_cn.menu_approval_cn_config"
+              sequence="40"/>
+
+    <menuitem id="menu_approval_external_config"
+              name="平台配置"
+              parent="menu_approval_external_root"
+              action="action_external_config"
+              sequence="10"/>
+</odoo>
