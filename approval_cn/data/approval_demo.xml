@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- 演示：采购订单 - 完整分支审批流程（含并行） -->
+    <!--
+    流程结构：
+        发起申请 → 条件分支 → 小额: 部门经理(或签) → 抄送财务
+                           → 大额: 部门经理(会签) ╮
+                                   财务总监(或签)   ├→ 总经理 → 抄送董事长
+                                                    ╯  ↑ 并行 ↑
+    -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+
+    <record id="demo_flow_po_full" model="approval.flow">
+        <field name="name">采购订单审批（完整分支流程）</field>
+        <field name="category_id" ref="approval_category_purchase_order"/>
+        <field name="sequence">5</field>
+        <field name="is_default" eval="True"/>
+        <field name="condition_type">always</field>
+        <field name="description">
+            完整的分支审批流程示例：
+            1. 金额 &lt; 10000 → 部门经理单级审批 → 抄送财务
+            2. 金额 ≥ 10000 → 部门经理(会签) + 财务总监(并行) → 总经理 → 抄送董事长
+        </field>
+    </record>
+
+    <!-- 节点1：发起申请（开始节点） -->
+    <record id="demo_node_po_start" model="approval.node">
+        <field name="flow_id" ref="demo_flow_po_full"/>
+        <field name="name">发起申请</field>
+        <field name="sequence">1</field>
+        <field name="node_type">handler</field>
+        <field name="handler_type">requester</field>
+    </record>
+
+    <!-- 节点2：条件分支 -->
+    <record id="demo_node_po_condition" model="approval.node">
+        <field name="flow_id" ref="demo_flow_po_full"/>
+        <field name="name">金额条件判断</field>
+        <field name="sequence">2</field>
+        <field name="node_type">condition</field>
+        <field name="parent_ids" eval="[(4, ref('demo_node_po_start'))]"/>
+    </record>
+
+    <!-- 节点3：部门经理审批（小额分支） -->
+    <record id="demo_node_po_small_mgr" model="approval.node">
+        <field name="flow_id" ref="demo_flow_po_full"/>
+        <field name="name">部门经理审批</field>
+        <field name="sequence">3</field>
+        <field name="node_type">approver</field>
+        <field name="sign_type">or_sign</field>
+        <field name="approver_type">specific_user</field>
+        <field name="approver_ids" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- 节点4：抄送财务（小额分支结束） -->
+    <record id="demo_node_po_small_cc" model="approval.node">
+        <field name="flow_id" ref="demo_flow_po_full"/>
+        <field name="name">抄送财务部</field>
+        <field name="sequence">4</field>
+        <field name="node_type">cc</field>
+        <field name="cc_type">specific_user</field>
+        <field name="cc_ids" eval="[(4, ref('base.user_admin'))]"/>
+        <field name="parent_ids" eval="[(4, ref('demo_node_po_small_mgr'))]"/>
+    </record>
+
+    <!-- 节点5：部门经理审批（大额分支-会签） -->
+    <record id="demo_node_po_large_mgr" model="approval.node">
+        <field name="flow_id" ref="demo_flow_po_full"/>
+        <field name="name">部门经理审批（会签）</field>
+        <field name="sequence">5</field>
+        <field name="node_type">approver</field>
+        <field name="sign_type">countersign</field>
+        <field name="approver_type">specific_user</field>
+        <field name="approver_ids" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- 节点6：财务总监审批（大额分支-并行） -->
+    <record id="demo_node_po_large_cfo" model="approval.node">
+        <field name="flow_id" ref="demo_flow_po_full"/>
+        <field name="name">财务总监审批</field>
+        <field name="sequence">6</field>
+        <field name="node_type">approver</field>
+        <field name="sign_type">or_sign</field>
+        <field name="approver_type">specific_user</field>
+        <field name="approver_ids" eval="[(4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- 节点7：总经理审批（大额汇合节点） -->
+    <record id="demo_node_po_large_ceo" model="approval.node">
+        <field name="flow_id" ref="demo_flow_po_full"/>
+        <field name="name">总经理审批</field>
+        <field name="sequence">7</field>
+        <field name="node_type">approver</field>
+        <field name="sign_type">or_sign</field>
+        <field name="approver_type">specific_user</field>
+        <field name="approver_ids" eval="[(4, ref('base.user_admin'))]"/>
+        <field name="parent_ids"
+               eval="[(4, ref('demo_node_po_large_mgr')), (4, ref('demo_node_po_large_cfo'))]"/>
+    </record>
+
+    <!-- 节点8：抄送董事长（大额分支结束） -->
+    <record id="demo_node_po_large_cc" model="approval.node">
+        <field name="flow_id" ref="demo_flow_po_full"/>
+        <field name="name">抄送董事长</field>
+        <field name="sequence">8</field>
+        <field name="node_type">cc</field>
+        <field name="cc_type">specific_user</field>
+        <field name="cc_ids" eval="[(4, ref('base.user_admin'))]"/>
+        <field name="parent_ids" eval="[(4, ref('demo_node_po_large_ceo'))]"/>
+    </record>
+
+    <!-- 条件规则 -->
+    <record id="demo_condition_small" model="approval.condition.line">
+        <field name="node_id" ref="demo_node_po_condition"/>
+        <field name="name">小额采购（&lt; 10000）</field>
+        <field name="sequence">10</field>
+        <field name="condition_type">amount_below</field>
+        <field name="condition_amount" eval="10000"/>
+        <field name="next_node_ids" eval="[(4, ref('demo_node_po_small_mgr'))]"/>
+    </record>
+
+    <record id="demo_condition_large" model="approval.condition.line">
+        <field name="node_id" ref="demo_node_po_condition"/>
+        <field name="name">大额采购（≥ 10000）</field>
+        <field name="sequence">20</field>
+        <field name="condition_type">amount_above</field>
+        <field name="condition_amount" eval="9999"/>
+        <field name="next_node_ids"
+               eval="[(4, ref('demo_node_po_large_mgr')), (4, ref('demo_node_po_large_cfo'))]"/>
+    </record>
+</odoo>
