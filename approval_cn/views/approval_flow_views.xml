@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_approval_flow_tree" model="ir.ui.view">
+        <field name="name">approval.flow.tree</field>
+        <field name="model">approval.flow</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="category_id"/>
+                <field name="condition_type"/>
+                <field name="node_count"/>
+                <field name="is_default"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_approval_flow_form" model="ir.ui.view">
+        <field name="name">approval.flow.form</field>
+        <field name="model">approval.flow</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon"
+                            title="已归档" bg_color="bg-danger"
+                            invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="category_id"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="is_default"/>
+                            <field name="condition_type"/>
+                            <field name="condition_amount_min"
+                                   invisible="condition_type != 'amount'"
+                                   required="condition_type == 'amount'"/>
+                            <field name="condition_amount_max"
+                                   invisible="condition_type != 'amount'"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <group string="流程说明">
+                        <field name="description" nolabel="1"
+                               placeholder="描述此审批流程的适用场景..."/>
+                    </group>
+                    <group string="审批节点" groups="approval_cn.group_approval_admin">
+                        <field name="node_ids" nolabel="1"
+                               context="{'default_flow_id': id}">
+                            <list editable="bottom">
+                                <field name="sequence" widget="handle"/>
+                                <field name="name"/>
+                                <field name="node_type"/>
+                                <field name="sign_type"/>
+                                <field name="approver_type"/>
+                                <field name="approver_ids"
+                                       widget="many2many_tags"
+                                       invisible="approver_type != 'specific_user'"/>
+                                <field name="approver_group_ids"
+                                       widget="many2many_tags"
+                                       invisible="approver_type != 'specific_group'"/>
+                                <field name="required"/>
+                                <field name="timeout_hours"/>
+                            </list>
+                        </field>
+                    </group>
+                    <field name="active" invisible="1"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_approval_flow_search" model="ir.ui.view">
+        <field name="name">approval.flow.search</field>
+        <field name="model">approval.flow</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="category_id"/>
+                <field name="condition_type"/>
+                <filter name="active_filter" string="已启用"
+                        domain="[('active', '=', True)]"/>
+                <separator/>
+                <filter name="group_category" string="审批类型"
+                        context="{'group_by': 'category_id'}"/>
+            </search>
+        </field>
+    </record>
+</odoo>
