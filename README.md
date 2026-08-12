@@ -1,6 +1,5 @@
 # Odoo 19 自研模块全集
 
-> **项目**: 四川万邦胜辉 ERP 系统定制开发  
 > **Odoo 版本**: 19.0 Community  
 > **语言**: Python 3.12+ / JavaScript / XML  
 
