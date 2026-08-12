@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- ── 超时审批提醒 ── -->
+    <record id="ir_cron_approval_timeout_reminder" model="ir.cron">
+        <field name="name">审批超时提醒</field>
+        <field name="model_id" ref="model_approval_request"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_check_timeout()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">hours</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>
