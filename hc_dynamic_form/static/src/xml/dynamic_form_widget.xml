@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="hc_dynamic_form.FormDataTextField">
+        <textarea
+            class="o_field_widget form-control"
+            rows="12"
+            style="min-height: 280px; font-family: monospace; width: 100%;"
+            t-att-value="text.value"
+            t-on-input="onInput"
+        ><t t-esc="text.value"/></textarea>
+    </t>
+
+    <t t-name="hc_dynamic_form.FormDataHtmlField">
+        <div t-if="!loaded.value" class="text-muted p-3">
+            <i class="fa fa-spinner fa-spin"/> 加载字段定义中...
+        </div>
+        <div t-elif="error.value" class="alert alert-warning">
+            <p>加载字段失败: <t t-esc="error.value"/></p>
+            <p>请在下方 JSON 文本框中直接编辑（兜底方案）：</p>
+            <textarea class="form-control" rows="10"
+                style="font-family: monospace; width: 100%;"
+                t-att-value="JSON.stringify(props.value, null, 2)"
+                t-on-input="(ev) => props.update(JSON.parse(ev.target.value || '{}'))"/>
+        </div>
+        <div t-else="" t-on-change="onChange" t-on-input="onChange" class="hc_dynamic_form_body">
+            <div t-if="!fields.value.length" class="alert alert-warning">
+                <i class="fa fa-warning me-2"/>未配置模板字段，请联系管理员。
+            </div>
+            <t t-else="">
+                <div t-foreach="fields.value" t-as="fd" t-key="fd.field_key"
+                     class="hc_df_row mb-3" t-att-data-key="fd.field_key" t-att-data-type="fd.field_type">
+                    <label class="form-label fw-bold d-block mb-1">
+                        <t t-esc="fd.name"/>
+                        <span t-if="fd.required" class="text-danger ms-1">*</span>
+                    </label>
+
+                    <t t-if="fd.field_type === 'char' or fd.field_type === 'many2one'">
+                        <input type="text" class="form-control"
+                               t-att-value="getValue(fd.field_key)"
+                               t-att-placeholder="fd.help_text"/>
+                    </t>
+
+                    <t t-if="fd.field_type === 'text' or fd.field_type === 'html'">
+                        <textarea class="form-control" rows="3"
+                                  t-att-placeholder="fd.help_text"><t t-esc="getValue(fd.field_key)"/></textarea>
+                    </t>
+
+                    <t t-if="fd.field_type === 'integer' or fd.field_type === 'float'">
+                        <input type="number" class="form-control"
+                               t-att-step="fd.field_type === 'float' ? '0.01' : '1'"
+                               t-att-value="getValue(fd.field_key)"/>
+                    </t>
+
+                    <t t-if="fd.field_type === 'date'">
+                        <input type="date" class="form-control"
+                               t-att-value="getValue(fd.field_key)"/>
+                    </t>
+
+                    <t t-if="fd.field_type === 'datetime'">
+                        <input type="datetime-local" class="form-control"
+                               t-att-value="getValue(fd.field_key)"/>
+                    </t>
+
+                    <t t-if="fd.field_type === 'boolean'">
+                        <div class="form-check form-switch">
+                            <input type="checkbox" class="form-check-input"
+                                   t-att-checked="getValue(fd.field_key)"/>
+                        </div>
+                    </t>
+
+                    <t t-if="fd.field_type === 'selection'">
+                        <select class="form-select">
+                            <option value="">-- 请选择 --</option>
+                            <t t-foreach="(fd.selection_options or '').split('\n')" t-as="opt_raw" t-key="opt_raw_index">
+                                <t t-set="opt" t-value="opt_raw.trim()"/>
+                                <option t-if="opt" t-att-value="opt"
+                                        t-att-selected="String(getValue(fd.field_key)) === opt">
+                                    <t t-esc="opt"/>
+                                </option>
+                            </t>
+                        </select>
+                    </t>
+
+                    <t t-if="fd.field_type === 'user'">
+                        <select class="form-select">
+                            <option value="">-- 请选择用户 --</option>
+                            <t t-foreach="options.value.users" t-as="u" t-key="u.id">
+                                <option t-att-value="u.id"
+                                        t-att-selected="String(getValue(fd.field_key)) === String(u.id)">
+                                    <t t-esc="u.name"/>
+                                </option>
+                            </t>
+                        </select>
+                    </t>
+
+                    <t t-if="fd.field_type === 'company'">
+                        <select class="form-select">
+                            <option value="">-- 请选择公司 --</option>
+                            <t t-foreach="options.value.companies" t-as="c" t-key="c.id">
+                                <option t-att-value="c.id"
+                                        t-att-selected="String(getValue(fd.field_key)) === String(c.id)">
+                                    <t t-esc="c.name"/>
+                                </option>
+                            </t>
+                        </select>
+                    </t>
+
+                    <t t-if="fd.field_type === 'department'">
+                        <select class="form-select">
+                            <option value="">-- 请选择部门 --</option>
+                            <t t-foreach="options.value.departments" t-as="d" t-key="d.id">
+                                <option t-att-value="d.id"
+                                        t-att-selected="String(getValue(fd.field_key)) === String(d.id)">
+                                    <t t-esc="d.name"/>
+                                </option>
+                            </t>
+                        </select>
+                    </t>
+
+                    <small t-if="fd.help_text" class="form-text text-muted d-block mt-1">
+                        <t t-esc="fd.help_text"/>
+                    </small>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>
