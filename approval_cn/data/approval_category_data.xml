@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- 预设审批类型 -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+
+    <!-- 1. 采购订单审批 -->
+    <record id="approval_category_purchase_order" model="approval.category">
+        <field name="name">采购订单审批</field>
+        <field name="code">purchase_order</field>
+        <field name="model_name">purchase.order</field>
+        <field name="description">采购订单的提交、审核、批准流程</field>
+        <field name="sequence">10</field>
+    </record>
+
+    <!-- 2. 付款审批 -->
+    <record id="approval_category_payment" model="approval.category">
+        <field name="name">付款审批</field>
+        <field name="code">payment</field>
+        <field name="model_name">account.payment</field>
+        <field name="description">付款申请的审批流程</field>
+        <field name="sequence">20</field>
+    </record>
+
+    <!-- 3. 采购付款审批 -->
+    <record id="approval_category_purchase_payment" model="approval.category">
+        <field name="name">采购付款审批</field>
+        <field name="code">purchase_payment</field>
+        <field name="model_name">account.payment</field>
+        <field name="description">采购付款的专项审批流程</field>
+        <field name="sequence">30</field>
+    </record>
+
+    <!-- 4. 采购合同审批 -->
+    <record id="approval_category_purchase_contract" model="approval.category">
+        <field name="name">采购合同审批</field>
+        <field name="code">purchase_contract</field>
+        <field name="model_name">purchase.order</field>
+        <field name="description">采购合同的签署审批流程</field>
+        <field name="sequence">40</field>
+    </record>
+</odoo>
