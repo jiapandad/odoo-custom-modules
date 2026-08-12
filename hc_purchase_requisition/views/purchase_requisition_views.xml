@@ -27,7 +27,7 @@
                        decoration-success="state == 'approved'"
                        decoration-danger="state == 'rejected'"
                        decoration-muted="state in ('draft', 'cancelled')"/>
-                <field name="flow_id" optional="show"/>
+                <field name="flow_id" required="1" readonly="0"/>
                 <field name="create_date" optional="show"/>
                 <field name="applicant_user_id" invisible="1"/>
             </list>
