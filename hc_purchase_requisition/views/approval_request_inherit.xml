@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 扩展审批请求表单：让申请说明占满宽度，避免右侧大量空白 -->
+    <record id="view_approval_request_form_inherit_description" model="ir.ui.view">
+        <field name="name">approval.request.form.inherit.description</field>
+        <field name="model">approval.request</field>
+        <field name="inherit_id" ref="approval_cn.view_approval_request_form"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='description']/ancestor::group[1]" position="replace">
+                <group colspan="2" col="1">
+                    <field name="description" nolabel="1" placeholder="请描述申请原因..."
+                           class="oe_form_field_text_large"/>
+                </group>
+            </xpath>
+
+            <!-- 审批请求提交后，关键字段只读，防止修改 -->
+            <xpath expr="//field[@name='name']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='category_id']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='flow_id']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='request_user_id']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='model_name']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='res_name']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='amount']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='request_date']" position="attributes">
+                <attribute name="readonly">state != 'draft'</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>
