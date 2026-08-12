@@ -29,3 +29,5 @@ access_approval_transfer_wizard_system,approval.transfer.wizard.system,model_app
 access_approval_transfer_wizard,approval.transfer.wizard,model_approval_transfer_wizard,approval_cn.group_approval_user,1,1,1,1
 access_approval_comment_wizard_system,approval.comment.wizard.system,model_approval_comment_wizard,base.group_system,1,1,1,1
 access_approval_comment_wizard,approval.comment.wizard,model_approval_comment_wizard,approval_cn.group_approval_user,1,1,1,1
+access_approval_countersign_user,approval.countersign.user,model_approval_countersign,approval_cn.group_approval_user,1,1,1,0
+access_approval_countersign_admin,approval.countersign.admin,model_approval_countersign,approval_cn.group_approval_admin,1,1,1,1
