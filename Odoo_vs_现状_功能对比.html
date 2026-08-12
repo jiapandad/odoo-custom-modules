@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Odoo 一体化平台 vs 钉钉 功能对比分析</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; background:#f0f2f5; color:#2d3748; line-height:1.8; }
+
+.container { max-width:1100px; margin:0 auto; padding:40px 20px; }
+
+.cover { background:linear-gradient(135deg, #1a1a2e, #16213e 70%, #0f3460); color:#fff; padding:70px 55px; border-radius:12px; text-align:center; margin-bottom:28px; }
+.cover h1 { font-size:34px; font-weight:700; letter-spacing:2px; margin-bottom:12px; }
+.cover .sub { font-size:17px; opacity:0.85; font-weight:400; }
+.cover .meta { margin-top:25px; font-size:13px; opacity:0.5; }
+
+.section { background:#fff; border-radius:10px; padding:32px 38px; margin-bottom:22px; box-shadow:0 2px 6px rgba(0,0,0,0.05); }
+.section h3 { font-size:21px; color:#1a1a2e; border-left:4px solid #3b82f6; padding-left:14px; margin-bottom:18px; }
+.section h4 { font-size:16px; color:#4b5563; margin:18px 0 8px; font-weight:600; }
+
+/* Tables */
+.compare-table { width:100%; border-collapse:collapse; font-size:13.5px; margin:12px 0; }
+.compare-table th { background:#f1f5f9; padding:11px 14px; text-align:left; font-weight:600; color:#374151; border-bottom:2px solid #d1d5db; white-space:nowrap; }
+.compare-table th:first-child { width:14%; }
+.compare-table td { padding:11px 14px; border-bottom:1px solid #f3f4f6; vertical-align:top; }
+.compare-table tr:hover td { background:#f9fafb; }
+
+/* Badges */
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; margin:2px 2px 2px 0; }
+.badge-ding { background:#e0e7ff; color:#3730a3; }
+.badge-odoo { background:#d1fae5; color:#065f46; }
+.badge-custom { background:#fef3c7; color:#92400e; }
+.badge-u8 { background:#fce7f3; color:#9d174d; }
+
+/* Status dots */
+.dot-yes { color:#10b981; font-weight:700; }
+.dot-partial { color:#f59e0b; font-weight:700; }
+.dot-no { color:#ef4444; }
+
+/* Highlight box */
+.highlight { background:linear-gradient(135deg,#eff6ff,#f0fdf4); border:1px solid #d1e5f0; border-radius:8px; padding:20px 24px; margin:18px 0; }
+.highlight h4 { margin:0 0 8px; color:#1e40af; }
+
+/* Pain point flow */
+.flow-row { display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin:16px 0; font-size:13px; }
+.flow-box { border-radius:6px; padding:8px 14px; font-weight:600; text-align:center; }
+.flow-sep { font-size:18px; color:#9ca3af; font-weight:300; }
+.flow-red { background:#fef2f2; border:2px solid #ef4444; color:#991b1b; }
+.flow-blue { background:#eff6ff; border:2px solid #3b82f6; color:#1e40af; }
+
+/* Stats */
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin:18px 0; }
+.stat-card { background:#f8fafc; border-radius:8px; padding:22px; text-align:center; border:1px solid #e5e7eb; }
+.stat-num { font-size:28px; font-weight:700; color:#3b82f6; }
+.stat-label { font-size:12px; color:#6b7280; margin-top:4px; }
+
+/* Gap markers */
+.gap-marker { display:inline-block; color:#ef4444; font-weight:700; background:#fef2f2; padding:1px 6px; border-radius:3px; font-size:11px; }
+
+/* Section box */
+.info-box { background:#fffbeb; border:1px solid #fcd34d; border-radius:6px; padding:14px 18px; margin:14px 0; font-size:13px; color:#92400e; }
+.info-box strong { color:#b45309; }
+
+ul { padding-left:18px; font-size:13.5px; }
+li { margin-bottom:4px; }
+
+@media print { body { background:#fff; } .section { box-shadow:none; border:1px solid #e5e7eb; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- COVER -->
+<div class="cover">
+  <h1>Odoo 一体化平台 · 功能对比分析</h1>
+  <div class="sub">钉钉审批 + 用友U8 + 手工汇报  →  Odoo 19 统一平台</div>
+  <div class="meta">四川万邦胜辉 · 2026年8月</div>
+</div>
+
+<!-- 核心痛点 -->
+<div class="section">
+  <h3>为什么需要 Odoo？</h3>
+
+  <div class="info-box">
+    <strong>客观事实：</strong>钉钉拥有业界领先的OA审批能力（条件分支、并行审批、角色审批、移动端体验等），单论审批功能本身并不输给Odoo。
+  </div>
+
+  <div class="highlight">
+    <h4>真正的痛点在三个断层</h4>
+    <div class="flow-row" style="margin-top:12px;">
+      <div class="flow-box flow-red">钉钉审批<br><small>OA能力强</small></div>
+      <div class="flow-sep">✕</div>
+      <div class="flow-box flow-red">U8 采购/库存/财务<br><small>无连接</small></div>
+    </div>
+    <p style="margin-top:10px;color:#991b1b;font-weight:600;">断层 ①：审批通过后，数据不会自动进入U8——需要人工重新录入</p>
+
+    <div class="flow-row" style="margin-top:12px;">
+      <div class="flow-box flow-red">业务需求<br><small>请购/比价/合同</small></div>
+      <div class="flow-sep">✕</div>
+      <div class="flow-box flow-red">钉钉<br><small>无采购流程</small></div>
+    </div>
+    <p style="margin-top:10px;color:#991b1b;font-weight:600;">断层 ②：采购全流程（请购→询价→比价→合同→订单）在钉钉中无法承载</p>
+
+    <div class="flow-row" style="margin-top:12px;">
+      <div class="flow-box flow-red">项目进度/成本</div>
+      <div class="flow-sep">✕</div>
+      <div class="flow-box flow-red">PPT 手工汇报</div>
+    </div>
+    <p style="margin-top:10px;color:#991b1b;font-weight:600;">断层 ③：项目管理依赖手工PPT，数据滞后、维度单一、无成本联动</p>
+  </div>
+</div>
+
+<!-- 核心对比表 -->
+<div class="section">
+<!-- ====== Odoo vs U8 职责划分 ====== -->
+<div class="section">
+  <h3>Odoo vs U8：谁干什么</h3>
+  <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Odoo 不是替代 U8——U8 继续作为财务核心。Odoo 负责所有前端业务，通过连接器自动同步到 U8。</p>
+
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th style="width:14%">业务域</th>
+        <th style="width:43%;background:#eff6ff;">🟦 Odoo 负责（前端业务系统）</th>
+        <th style="width:43%;background:#fdf2f8;">🟪 U8 负责（财务后端）</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>审批管理</strong></td>
+        <td style="background:#f8faff;">
+          <span class="badge badge-custom">自研 v2.0</span> 会签/或签/条件分支/加签/委托/撤回/超时自动处理/批量审批<br>
+          ✓ 审批通过 → 自动触发后续业务
+        </td>
+        <td style="background:#fef5fa;">不涉及（钉钉审批替换为 Odoo 审批）</td>
+      </tr>
+      <tr>
+        <td><strong>请购管理</strong></td>
+        <td style="background:#f8faff;">
+          <span class="badge badge-custom">自研</span> 请购单 → 审批 → 自动生成 RFQ<br>
+          ✓ 物料明细、预估金额、项目关联、流程自选+记忆
+        </td>
+        <td style="background:#fef5fa;">不涉及（钉钉无此功能）</td>
+      </tr>
+      <tr>
+        <td><strong>询价 & 比价</strong></td>
+        <td style="background:#f8faff;">
+          <span class="badge badge-custom">自研</span> 多供应商询价 → 在线/线下报价 → 自动比价 → 定标 → 生成 PO
+        </td>
+        <td style="background:#fef5fa;">不涉及（无此流程）</td>
+      </tr>
+      <tr>
+        <td><strong>采购合同</strong></td>
+        <td style="background:#f8faff;">
+          <span class="badge badge-custom">自研</span> 合同创建→审批→归档，关联PO，变更/补充协议
+        </td>
+        <td style="background:#fef5fa;">不涉及（无此流程）</td>
+      </tr>
+      <tr>
+        <td><strong>采购订单 PO</strong></td>
+        <td style="background:#f8faff;">
+          <span class="badge badge-odoo">Odoo</span> <span class="badge badge-custom">连接器</span> PO创建/确认/变更<br>
+          ✓ <strong>→ 自动推送 U8</strong>（头+行+物料编码+供应商）<br>
+          ✓ 物料编码智能映射，供应商自动创建
+        </td>
+        <td style="background:#fef5fa;">
+          <span class="badge badge-u8">U8 接收</span> 自动写入 PO_Pomain + PO_Podetails<br>
+          ✓ 后续做入库单、发票、付款 —— 原有流程不变
+        </td>
+      </tr>
+      <tr>
+        <td><strong>收货 & 库存</strong></td>
+        <td style="background:#f8faff;">
+          <span class="badge badge-odoo">Odoo</span> 仓库收货→质检→入库，实时库存，批次追踪，安全库存预警
+        </td>
+        <td style="background:#fef5fa;">
+          <span class="badge badge-u8">U8 同步</span> Odoo 入库 → U8 入库单（规划中）
+        </td>
+      </tr>
+      <tr>
+        <td><strong>供应商主数据</strong></td>
+        <td style="background:#f8faff;">
+          <span class="badge badge-odoo">Odoo</span> <span class="badge badge-custom">连接器</span> 供应商信息管理<br>
+          ✓ <strong>U8 → Odoo</strong> 每日自动拉取供应商列表<br>
+          ✓ Odoo ref 自动匹配 U8 cVenCode
+        </td>
+        <td style="background:#fef5fa;">
+          <span class="badge badge-u8">U8 主数据源</span> 供应商档案（Vendor表）<br>
+          ✓ 编码、名称、银行、税号 —— <strong>以 U8 为准</strong>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>项目管理</strong></td>
+        <td style="background:#f8faff;">
+          <span class="badge badge-odoo">Odoo</span> <span class="badge badge-custom">3个自研</span> WBS+甘特图<br>
+          ✓ 工时成本、采购成本自动归集<br>
+          ✓ 预算vs实际看板、项目总成本实时展示
+        </td>
+        <td style="background:#fef5fa;">不涉及（U8 无项目管理模块）</td>
+      </tr>
+      <tr>
+        <td><strong>销售 & CRM</strong></td>
+        <td style="background:#f8faff;">
+          <span class="badge badge-odoo">Odoo</span> 线索→商机→报价→订单→发货→开票<br>
+          ✓ 销售漏斗、客户360、电子签章
+        </td>
+        <td style="background:#fef5fa;">
+          <span class="badge badge-u8">U8 接收</span> 销售发票记账、应收款管理
+        </td>
+      </tr>
+      <tr>
+        <td><strong>财务核算</strong></td>
+        <td style="background:#f8faff;">
+          <span class="badge badge-odoo">Odoo 辅助</span> 应收应付、三单匹配、多公司多账套
+        </td>
+        <td style="background:#fef5fa;">
+          <span class="badge badge-u8">U8 核心</span> 总账/明细账/固定资产/报表/税务<br>
+          ✓ <strong>U8 是财务唯一数据源，不可替代</strong>
+        </td>
+      </tr>
+      <tr>
+        <td><strong>数据同步</strong></td>
+        <td style="background:#f8faff;">
+          <span class="badge badge-custom">自研 U8连接器</span><br>
+          ✓ Odoo→U8：PO自动推送<br>
+          ✓ U8→Odoo：供应商每日同步<br>
+          ✓ 失败告警、多账套独立配置
+        </td>
+        <td style="background:#fef5fa;">
+          <span class="badge badge-u8">被动接收</span> U8 不主动向外推送<br>
+          ✓ PO_Pomain / PO_Podetails 表供写入<br>
+          ✓ Vendor 表供拉取
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:1px solid #93c5fd;border-radius:10px;padding:22px 28px;margin-top:22px;text-align:center;">
+    <div style="font-size:28px;margin-bottom:8px;">Odoo ↔ U8 分工原则</div>
+    <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;max-width:700px;margin:0 auto;">
+      <div style="background:#dbeafe;border-radius:8px;padding:16px;text-align:left;">
+        <strong style="color:#1d4ed8;">Odoo 做的事</strong>
+        <ul style="font-size:13px;margin-top:6px;color:#1e40af;">
+          <li>所有审批流程</li>
+          <li>请购 → 询价 → 比价 → 定标</li>
+          <li>采购合同管理</li>
+          <li>PO 生成与管理</li>
+          <li>仓库收货 + 库存管理</li>
+          <li>项目管理（任务/成本/预算）</li>
+          <li>销售 CRM + 报价 + 订单</li>
+        </ul>
+      </div>
+      <div style="font-size:32px;font-weight:700;color:#3b82f6;">→</div>
+      <div style="background:#fce7f3;border-radius:8px;padding:16px;text-align:left;">
+        <strong style="color:#9d174d;">U8 继续做的事</strong>
+        <ul style="font-size:13px;margin-top:6px;color:#831843;">
+          <li>采购入库记账</li>
+          <li>应付账款管理</li>
+          <li>发票校验 & 付款</li>
+          <li>总账 & 明细账</li>
+          <li>固定资产</li>
+          <li>财务报表</li>
+          <li>税务申报</li>
+        </ul>
+      </div>
+    </div>
+    <p style="font-size:13px;color:#6b7280;margin-top:14px;">
+      Odoo 管"业务前端" → 自动同步 → U8 管"财务后端"。U8 的采购/库存模块不再手工录入，所有数据由 Odoo 产生后自动写入。
+    </p>
+  </div>
+</div>
+
+<!-- ====== 核心对比表 ====== -->
+<div class="section">
+  <h3>核心业务功能对比</h3>
+
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>业务域</th>
+        <th>钉钉 + U8</th>
+        <th>Odoo 19 + 自研模块</th>
+        <th>差异分析</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- 审批 -->
+      <tr>
+        <td><strong>OA 审批</strong></td>
+        <td>
+          <span class="badge badge-ding">钉钉</span><br>
+          <span class="dot-yes">●</span> 条件分支审批<br>
+          <span class="dot-yes">●</span> 并行/会签审批<br>
+          <span class="dot-yes">●</span> 角色审批（主管/HR）<br>
+          <span class="dot-yes">●</span> 移动端审批<br>
+          <span class="dot-yes">●</span> 审批进度可视化<br>
+          <span class="dot-no">○</span> <span class="gap-marker">断层</span> 审批结果不自动流入U8
+        </td>
+        <td>
+          <span class="badge badge-custom">approval_cn v2.0</span><br>
+          <span class="dot-yes">●</span> 条件分支 + 会签/或签/顺签<br>
+          <span class="dot-yes">●</span> 前/后加签 + 委托 + 撤回<br>
+          <span class="dot-yes">●</span> 超时自动通过/驳回<br>
+          <span class="dot-yes">●</span> 批量审批<br>
+          <span class="dot-yes">●</span> 动态审批人（部门经理/直属上级）<br>
+          <span class="dot-yes">●</span> <strong>审批通过→自动生成业务单据→推送U8</strong>
+        </td>
+        <td>
+          钉钉审批功能本身很完善，但<span style="color:#ef4444;font-weight:600;">与U8断层</span>是核心问题。<br>
+          Odoo审批直接嵌入业务流程：<br>
+          请购审批通过 → 自动生成采购询价单 → 比价定标 → 生成PO → 推送U8，<strong>全程无人为断点</strong>。
+        </td>
+      </tr>
+
+      <!-- 采购流程 -->
+      <tr>
+        <td><strong>采购全流程</strong></td>
+        <td>
+          <span class="badge badge-ding">钉钉</span> <span class="badge badge-u8">U8</span><br>
+          <span class="dot-partial">◐</span> 钉钉：可发起采购申请<br>
+          <span class="dot-no">○</span> <strong>无请购单管理</strong><br>
+          <span class="dot-no">○</span> <strong>无询价比价</strong><br>
+          <span class="dot-no">○</span> <strong>无合同管理</strong><br>
+          <span class="dot-yes">●</span> U8：可录入采购订单<br>
+          <span class="gap-marker">断层</span> 两者之间数据不流通
+        </td>
+        <td>
+          <span class="badge badge-odoo">Odoo Purchase</span>
+          <span class="badge badge-custom">3个自研模块</span><br>
+          <span class="dot-yes">●</span> <strong>请购单</strong>：需求→审批流自选→记忆<br>
+          <span class="dot-yes">●</span> <strong>询价比价</strong>：多供应商在线/离线报价<br>
+          <span class="dot-yes">●</span> <strong>比价定标</strong>：自动对比→选中→生成PO<br>
+          <span class="dot-yes">●</span> <strong>采购合同</strong>：关联PO+审批<br>
+          <span class="dot-yes">●</span> <strong>PO→U8自动推送</strong>：含物料编码智能匹配
+        </td>
+        <td>
+          <strong>钉钉完全没有采购流程能力</strong>——这是Odoo最大的差异化优势。<br>
+          从请购到PO到U8，形成完整闭环。采购数据在Odoo中可查询、可追溯、可分析。
+        </td>
+      </tr>
+
+      <!-- 供应链 -->
+      <tr>
+        <td><strong>供应链 & 库存</strong></td>
+        <td>
+          <span class="badge badge-u8">仅U8</span><br>
+          <span class="dot-yes">●</span> 采购入库<br>
+          <span class="dot-yes">●</span> 库存管理<br>
+          <span class="dot-yes">●</span> 批次追踪<br>
+          <span class="dot-no">○</span> <strong>无采购前流程</strong><br>
+          <span class="dot-no">○</span> <strong>数据T+1</strong>
+        </td>
+        <td>
+          <span class="badge badge-odoo">Odoo Inventory</span>
+          <span class="badge badge-custom">U8连接器</span><br>
+          <span class="dot-yes">●</span> Odoo收货 → U8自动入库<br>
+          <span class="dot-yes">●</span> 实时库存（非T+1）<br>
+          <span class="dot-yes">●</span> 物料编码智能映射<br>
+          <span class="dot-yes">●</span> 项目库存独立核算<br>
+          <span class="dot-yes">●</span> 库存预警 + 安全库存
+        </td>
+        <td>
+          U8作为后端财务引擎保留，<strong>Odoo补齐前端供应链</strong>。<br>
+          双系统通过U8连接器实时同步，不改变财务现有流程。
+        </td>
+      </tr>
+
+      <!-- 项目管理 -->
+      <tr>
+        <td><strong>项目管理</strong></td>
+        <td>
+          <span class="badge badge-ding">钉钉</span> <span class="dot-no">+PPT</span><br>
+          <span class="dot-partial">◐</span> 钉钉：任务列表+日程<br>
+          <span class="dot-no">○</span> <strong>无成本归集</strong><br>
+          <span class="dot-no">○</span> <strong>无预算管控</strong><br>
+          <span class="dot-no">○</span> <strong>无采购联动</strong><br>
+          <span class="dot-no">○</span> 进度汇报靠PPT
+        </td>
+        <td>
+          <span class="badge badge-odoo">Odoo Project</span>
+          <span class="badge badge-custom">3个自研模块</span><br>
+          <span class="dot-yes">●</span> 甘特图 + 任务分解<br>
+          <span class="dot-yes">●</span> <strong>采购成本自动归集</strong><br>
+          <span class="dot-yes">●</span> <strong>工时成本实时计算</strong><br>
+          <span class="dot-yes">●</span> <strong>预算vs实际看板</strong><br>
+          <span class="dot-yes">●</span> 项目看板替代PPT汇报
+        </td>
+        <td>
+          <strong>钉钉任务管理仅限协作，无法管控成本和预算</strong>。<br>
+          Odoo项目=任务+采购+成本+预算四合一，告别PPT。
+        </td>
+      </tr>
+
+      <!-- 销售 -->
+      <tr>
+        <td><strong>销售管理</strong></td>
+        <td>
+          <span class="badge badge-ding">钉钉</span><br>
+          <span class="dot-no">○</span> <strong>无CRM</strong><br>
+          <span class="dot-no">○</span> 无报价管理<br>
+          <span class="dot-no">○</span> 无销售漏斗<br>
+          <span class="dot-partial">◐</span> 客户信息靠通讯录
+        </td>
+        <td>
+          <span class="badge badge-odoo">Odoo Sales + CRM</span><br>
+          <span class="dot-yes">●</span> 销售漏斗 + 商机管理<br>
+          <span class="dot-yes">●</span> 一键生成报价→订单<br>
+          <span class="dot-yes">●</span> 客户360视图<br>
+          <span class="dot-yes">●</span> 报价→发货→开票全流程
+        </td>
+        <td>
+          钉钉没有CRM和销售管理能力。<br>
+          Odoo CRM从线索到回款全程覆盖。
+        </td>
+      </tr>
+
+      <!-- 财务 -->
+      <tr>
+        <td><strong>财务 & 报告</strong></td>
+        <td>
+          <span class="badge badge-u8">U8 独立</span><br>
+          <span class="dot-yes">●</span> 总账/应收/应付<br>
+          <span class="dot-yes">●</span> 固定资产<br>
+          <span class="dot-no">○</span> <strong>与采购/库存断层</strong><br>
+          <span class="dot-no">○</span> 无项目利润核算
+        </td>
+        <td>
+          <span class="badge badge-odoo">Odoo + U8</span>
+          <span class="badge badge-custom">2026科目表</span><br>
+          <span class="dot-yes">●</span> U8保留为财务后端<br>
+          <span class="dot-yes">●</span> Odoo单据→U8凭证（规划中）<br>
+          <span class="dot-yes">●</span> <strong>项目利润实时可见</strong><br>
+          <span class="dot-yes">●</span> 多公司多账套
+        </td>
+        <td>
+          <strong>U8作为财务核心不变</strong>，Odoo补齐前端业务→自动对接U8。<br>
+          项目维度利润分析是U8不具备的能力。
+        </td>
+      </tr>
+
+      <!-- 协同 -->
+      <tr>
+        <td><strong>协同 & 沟通</strong></td>
+        <td>
+          <span class="badge badge-ding">钉钉聊天</span><br>
+          <span class="dot-yes">●</span> 即时通讯<br>
+          <span class="dot-yes">●</span> 群聊协作<br>
+          <span class="dot-no">○</span> <strong>沟通与业务脱离</strong><br>
+          <span class="dot-no">○</span> 文件过期丢失
+        </td>
+        <td>
+          <span class="badge badge-odoo">Odoo Chatter</span><br>
+          <span class="dot-yes">●</span> 每张单据内置聊天<br>
+          <span class="dot-yes">●</span> 讨论永久归档<br>
+          <span class="dot-yes">●</span> 审批流自动通知<br>
+          <span class="dot-yes">●</span> 文件关联业务单据
+        </td>
+        <td>
+          钉钉聊天功能优秀，但<strong>消息与业务脱节</strong>。<br>
+          Odoo Chatter让每条讨论挂在具体单据上，可追溯。
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+<!-- 价值总结 -->
+<div class="section" style="background:linear-gradient(135deg,#f0fdf4,#eff6ff);">
+  <h3>Odoo 带来的核心价值</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px;">
+    <div style="background:#fff;border-radius:8px;padding:20px;">
+      <h4 style="color:#3b82f6;margin:0 0 10px;">🔗 打通断层</h4>
+      <ul>
+        <li>钉钉审批 → Odoo业务单据 → U8 自动同步</li>
+        <li>一条链路，零人工中转</li>
+        <li>审批数据不再"飘在空中"</li>
+      </ul>
+    </div>
+    <div style="background:#fff;border-radius:8px;padding:20px;">
+      <h4 style="color:#10b981;margin:0 0 10px;">🔄 补全流程</h4>
+      <ul>
+        <li>钉钉缺失的采购全流程全部补齐</li>
+        <li>请购→询价→比价→合同→PO→U8</li>
+        <li>项目管理从PPT升级为实时看板</li>
+      </ul>
+    </div>
+    <div style="background:#fff;border-radius:8px;padding:20px;">
+      <h4 style="color:#8b5cf6;margin:0 0 10px;">📊 数据贯通</h4>
+      <ul>
+        <li>采购成本自动归集到项目</li>
+        <li>项目利润 = 收入−采购−工时−费用</li>
+        <li>不再需要Excel手工汇总</li>
+      </ul>
+    </div>
+    <div style="background:#fff;border-radius:8px;padding:20px;">
+      <h4 style="color:#f59e0b;margin:0 0 10px;">🛡️ 保留现有</h4>
+      <ul>
+        <li>U8作为财务引擎不变</li>
+        <li>钉钉可作为即时通讯保留</li>
+        <li>最小化变革阻力</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 采购全流程详解 ====== -->
+<div class="section">
+  <h3>采购全流程详解 — Odoo + 自研模块</h3>
+  <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">以下展示从需求提出到U8记账的完整采购链路，其中标 <span class="badge badge-custom">自研</span> 的环节为定制开发模块。</p>
+
+  <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:24px;margin-bottom:20px;">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <tr>
+        <td style="width:60px;text-align:center;vertical-align:middle;">
+          <div style="width:40px;height:40px;border-radius:50%;background:#dbeafe;color:#1d4ed8;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;">1</div>
+        </td>
+        <td style="width:140px;font-weight:700;color:#1e40af;">请购申请</td>
+        <td style="width:100px;"><span class="badge badge-custom">自研</span></td>
+        <td>
+          需求部门发起请购单 → 自动带出上次选择的审批流程 → 填写物料明细（可上传附件/技术规格）→ 系统自动计算预估金额 → <strong>提交审批</strong>
+        </td>
+      </tr>
+      <tr><td colspan="4" style="height:1px;background:#e5e7eb;"></td></tr>
+      <tr>
+        <td style="text-align:center;vertical-align:middle;">
+          <div style="width:40px;height:40px;border-radius:50%;background:#d1fae5;color:#065f46;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;">2</div>
+        </td>
+        <td style="font-weight:700;color:#065f46;">多级审批</td>
+        <td><span class="badge badge-custom">自研 v2.0</span></td>
+        <td>
+          会签/或签/顺签/条件分支 → 支持加签（前/后）、委托、撤回 → 超时自动通过或驳回 → 审批通过后<strong>自动生成采购询价单(RFQ)</strong>
+        </td>
+      </tr>
+      <tr><td colspan="4" style="height:1px;background:#e5e7eb;"></td></tr>
+      <tr>
+        <td style="text-align:center;vertical-align:middle;">
+          <div style="width:40px;height:40px;border-radius:50%;background:#fef3c7;color:#92400e;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;">3</div>
+        </td>
+        <td style="font-weight:700;color:#92400e;">询价 & 报价</td>
+        <td><span class="badge badge-custom">自研</span> <span class="badge badge-odoo">Odoo</span></td>
+        <td>
+          向多家供应商发送RFQ → 供应商在线报价或线下来件录入 → 自动对比各供应商价格/交期/条款 → 支持替代品管理
+        </td>
+      </tr>
+      <tr><td colspan="4" style="height:1px;background:#e5e7eb;"></td></tr>
+      <tr>
+        <td style="text-align:center;vertical-align:middle;">
+          <div style="width:40px;height:40px;border-radius:50%;background:#fce7f3;color:#9d174d;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;">4</div>
+        </td>
+        <td style="font-weight:700;color:#9d174d;">比价定标</td>
+        <td><span class="badge badge-custom">自研</span></td>
+        <td>
+          比价看板对比所有供应商报价 → 选择中标供应商 → 支持分项定标 → 定标审批 → <strong>自动生成正式采购订单(PO)</strong>
+        </td>
+      </tr>
+      <tr><td colspan="4" style="height:1px;background:#e5e7eb;"></td></tr>
+      <tr>
+        <td style="text-align:center;vertical-align:middle;">
+          <div style="width:40px;height:40px;border-radius:50%;background:#ede9fe;color:#5b21b6;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;">5</div>
+        </td>
+        <td style="font-weight:700;color:#5b21b6;">采购合同</td>
+        <td><span class="badge badge-custom">自研</span></td>
+        <td>
+          关联PO生成合同 → 合同审批 → 合同归档 → 支持变更/补充协议
+        </td>
+      </tr>
+      <tr><td colspan="4" style="height:1px;background:#e5e7eb;"></td></tr>
+      <tr>
+        <td style="text-align:center;vertical-align:middle;">
+          <div style="width:40px;height:40px;border-radius:50%;background:#f0fdf4;color:#166534;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;">6</div>
+        </td>
+        <td style="font-weight:700;color:#166534;">PO → U8 同步</td>
+        <td><span class="badge badge-custom">自研 U8连接器</span></td>
+        <td>
+          自动推送PO到U8 → 物料编码智能匹配 → 供应商/部门自动创建 → <strong>零人工录入</strong> → 失败自动告警通知管理员
+        </td>
+      </tr>
+      <tr><td colspan="4" style="height:1px;background:#e5e7eb;"></td></tr>
+      <tr>
+        <td style="text-align:center;vertical-align:middle;">
+          <div style="width:40px;height:40px;border-radius:50%;background:#f3f4f6;color:#374151;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;">7</div>
+        </td>
+        <td style="font-weight:700;color:#374151;">收货 & 入库</td>
+        <td><span class="badge badge-odoo">Odoo</span></td>
+        <td>
+          Odoo仓库收货 → 质检 → 入库 → 自动更新库存 → <strong>U8同步入库数据</strong>（规划中）
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="highlight">
+    <h4>关键亮点</h4>
+    <table style="width:100%;font-size:13px;margin-top:8px;">
+      <tr>
+        <td style="width:33%;padding:8px 12px;"><span class="dot-yes">●</span> <strong>流程可追溯</strong>：每一步操作都有时间戳和操作人</td>
+        <td style="width:33%;padding:8px 12px;"><span class="dot-yes">●</span> <strong>审批流程可记忆</strong>：用户上次选的流程下次自动带出</td>
+        <td style="padding:8px 12px;"><span class="dot-yes">●</span> <strong>多公司多账套</strong>：万邦/宇能/微世界可独立配置U8账套</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 12px;"><span class="dot-yes">●</span> <strong>供应商自动同步</strong>：U8→Odoo每日拉取最新供应商</td>
+        <td style="padding:8px 12px;"><span class="dot-yes">●</span> <strong>项目成本联动</strong>：每笔采购自动归集到对应项目</td>
+        <td style="padding:8px 12px;"><span class="dot-yes">●</span> <strong>数据备份</strong>：数据库每日凌晨自动备份，保留7天</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- ====== 项目管理能力 ====== -->
+<div class="section">
+  <h3>项目管理 — 从 PPT 到实时数据看板</h3>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:18px;">
+      <h4 style="color:#991b1b;margin:0 0 10px;">现状：PPT 汇报模式</h4>
+      <ul style="font-size:13px;color:#7f1d1d;">
+        <li>项目经理每周手动收集数据</li>
+        <li>Excel拼凑成本/进度/工时</li>
+        <li>数据滞后1-2周</li>
+        <li>不同项目口径不统一</li>
+        <li>领导看到的永远是"上周的真相"</li>
+      </ul>
+    </div>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:18px;">
+      <h4 style="color:#065f46;margin:0 0 10px;">未来：Odoo 实时看板</h4>
+      <ul style="font-size:13px;color:#064e3b;">
+        <li>采购成本自动归集到项目</li>
+        <li>员工录入工时→成本自动计算</li>
+        <li>预算剩余实时可见</li>
+        <li>超预算自动预警</li>
+        <li>甘特图展示进度</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4 style="margin-bottom:10px;">Odoo 项目模块能力矩阵</h4>
+  <table class="compare-table" style="margin-bottom:18px;">
+    <thead>
+      <tr><th>功能</th><th>说明</th><th>是否自研</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>任务分解 WBS</strong></td><td>多层级任务拆解、子任务、里程碑</td><td><span class="badge badge-odoo">Odoo 原生</span></td></tr>
+      <tr><td><strong>甘特图</strong></td><td>拖拽调整排期、依赖关系可视化</td><td><span class="badge badge-odoo">Odoo 原生</span></td></tr>
+      <tr><td><strong>工时记录</strong></td><td>员工填写工时→自动计算人力成本</td><td><span class="badge badge-odoo">Odoo 原生</span></td></tr>
+      <tr><td><strong>采购成本归集</strong></td><td>项目关联的所有PO金额自动汇总</td><td><span class="badge badge-custom">自研</span></td></tr>
+      <tr><td><strong>总成本看板</strong></td><td>采购+工时+费用 汇总展示在项目列表</td><td><span class="badge badge-custom">自研</span></td></tr>
+      <tr><td><strong>预算管理</strong></td><td>设定预算→实际vs预算对比→超支预警</td><td><span class="badge badge-custom">自研</span></td></tr>
+      <tr><td><strong>项目-请购联动</strong></td><td>请购单自动关联项目，报销同步项目</td><td><span class="badge badge-custom">自研</span></td></tr>
+      <tr><td><strong>看板视图</strong></td><td>拖拽卡片、自定义阶段、标签管理</td><td><span class="badge badge-odoo">Odoo 原生</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="highlight">
+    <h4>核心价值</h4>
+    <p style="font-size:13px;">项目经理不再做PPT —— 打开项目看板，<strong>进度、成本、利润、预算</strong>四维数据实时在眼前。异常项目自动飘红，领导打开手机就能看。</p>
+  </div>
+</div>
+
+<!-- ====== 销售与CRM ====== -->
+<div class="section">
+  <h3>销售管理 & CRM — 从线索到回款全流程</h3>
+
+  <div style="background:#f8fafc;border:1px solid #e5e7eb;border-radius:10px;padding:24px;margin-bottom:20px;">
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px;">
+      <tr>
+        <td style="width:55px;text-align:center;">
+          <div style="width:34px;height:34px;border-radius:50%;background:#fef3c7;color:#92400e;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;">①</div>
+        </td>
+        <td style="width:95px;font-weight:700;">线索管理</td>
+        <td>展会/网站/电话获取 → 录入CRM → 自动去重</td>
+      </tr>
+      <tr><td colspan="3" style="height:1px;background:#e5e7eb;"></td></tr>
+      <tr>
+        <td style="text-align:center;">
+          <div style="width:34px;height:34px;border-radius:50%;background:#dbeafe;color:#1d4ed8;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;">②</div>
+        </td>
+        <td style="font-weight:700;">商机转化</td>
+        <td>线索→商机：预计金额、预计成交日、竞争对手 → 进入销售漏斗</td>
+      </tr>
+      <tr><td colspan="3" style="height:1px;background:#e5e7eb;"></td></tr>
+      <tr>
+        <td style="text-align:center;">
+          <div style="width:34px;height:34px;border-radius:50%;background:#d1fae5;color:#065f46;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;">③</div>
+        </td>
+        <td style="font-weight:700;">报价管理</td>
+        <td>产品库选品 → 一键生成报价单 → 邮件/PDF发送 → 客户在线确认</td>
+      </tr>
+      <tr><td colspan="3" style="height:1px;background:#e5e7eb;"></td></tr>
+      <tr>
+        <td style="text-align:center;">
+          <div style="width:34px;height:34px;border-radius:50%;background:#fce7f3;color:#9d174d;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;">④</div>
+        </td>
+        <td style="font-weight:700;">销售订单</td>
+        <td>报价确认 → 转销售订单 → 锁定库存 → 生成生产/采购需求</td>
+      </tr>
+      <tr><td colspan="3" style="height:1px;background:#e5e7eb;"></td></tr>
+      <tr>
+        <td style="text-align:center;">
+          <div style="width:34px;height:34px;border-radius:50%;background:#ede9fe;color:#5b21b6;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;">⑤</div>
+        </td>
+        <td style="font-weight:700;">发货 & 开票</td>
+        <td>仓库发货 → 自动生成发票 → 应收款跟踪 → 收款登记</td>
+      </tr>
+    </table>
+  </div>
+
+  <h4 style="margin-bottom:10px;">CRM 核心能力</h4>
+  <table class="compare-table" style="margin-bottom:18px;">
+    <thead>
+      <tr><th>功能</th><th>说明</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>销售漏斗</strong></td><td>可视化各阶段商机数量和金额，预测未来收入</td></tr>
+      <tr><td><strong>客户360视图</strong></td><td>一个页面看到客户的所有报价、订单、发货、发票、沟通记录</td></tr>
+      <tr><td><strong>活动管理</strong></td><td>自动提醒打电话、发邮件、拜访，逾期未跟进自动升级</td></tr>
+      <tr><td><strong>产品配置器</strong></td><td>可选配/变体产品一键生成规格和报价</td></tr>
+      <tr><td><strong>报价模板</strong></td><td>预设报价模板，含公司Logo、条款、产品目录</td></tr>
+      <tr><td><strong>电子签章</strong></td><td>在线发送报价→客户在线签名确认</td></tr>
+      <tr><td><strong>销售团队管理</strong></td><td>多销售团队、多佣金方案、业绩排行</td></tr>
+      <tr><td><strong>移动端</strong></td><td>手机录入线索、查看漏斗、审批报价</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Footer -->
+<div style="text-align:center;padding:30px;color:#9ca3af;font-size:13px;">
+  Odoo 19 Community + 15 个自研模块 · github.com/jiapandad/odoo-custom-modules · 2026.08
+</div>
+
+</div>
+</body>
+</html>
