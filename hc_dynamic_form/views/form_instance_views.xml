@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_form_instance_form" model="ir.ui.view">
+        <field name="name">hc.form.instance.form</field>
+        <field name="model">hc.form.instance</field>
+        <field name="arch" type="xml">
+            <form string="动态表单">
+                <header>
+                    <button name="action_fill_defaults" type="object"
+                            string="填充默认值" class="btn-secondary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_submit_form" type="object"
+                            string="提交" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_view_approval_request" type="object"
+                            string="查看审批"
+                            invisible="not approval_request_id"/>
+                    <button name="action_cancel_form" type="object"
+                            string="取消"
+                            invisible="state not in ('draft','done')"/>
+                    <button name="action_draft_form" type="object"
+                            string="退回草稿"
+                            invisible="state != 'cancelled'"/>
+                    <field name="state" widget="badge"
+                           decoration-warning="state=='draft'"
+                           decoration-info="state=='done'"
+                           decoration-muted="state=='cancelled'"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="template_id" readonly="1"/>
+                            <field name="applicant_id" readonly="1"/>
+                            <field name="apply_date" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- One2many 内联编辑 -->
+                    <field name="field_value_ids" invisible="state != 'draft'">
+                        <list editable="bottom">
+                            <field name="field_name" readonly="1" string="字段名"/>
+                            <!-- 多行文本 - 列隐藏（多数模板不用） -->
+                            <field name="value_text" string="填写内容"
+                                   column_invisible="True"
+                                   invisible="field_type not in ('text','html')"
+                                   placeholder="请输入..."/>
+                            <!-- 普通文本值（char/int/float/date/selection） -->
+                            <field name="value_char" string="填写内容"
+                                   invisible="field_type in ('user','company','department','text','html')"
+                                   placeholder="请输入..."/>
+                            <!-- 附件数（仅显示，上传请用底部 chatter） -->
+                            <field name="attachment_count"
+                                   invisible="field_type not in ('binary','attachment','image')"
+                                   readonly="1"
+                                   string="附件数"/>
+                            <!-- 兼容旧数据：selection 字段（已不再创建，但旧数据可能存在） -->
+                            <field name="value_selection" column_invisible="True"
+                                   invisible="field_type != 'selection'"/>
+                            <!-- 可选值提示 -->
+                            <field name="available_options" string="可选值"
+                                   readonly="1"/>
+                            <!-- 填写说明（来自模板的 field_hint） -->
+                            <field name="value_hint" string="填写说明"
+                                   readonly="1"/>
+                            <!-- 用户/公司/部门 下拉选择 -->
+                            <field name="value_user_id" string="人员"
+                                   invisible="field_type != 'user'"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="value_company_id" string="公司"
+                                   invisible="field_type != 'company'"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="value_department_id" string="部门"
+                                   invisible="field_type != 'department'"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <!-- 附件数（仅显示，上传请用底部 chatter） -->
+                            <field name="attachment_count" string="附件数"
+                                   invisible="field_type not in ('binary','attachment','image')"
+                                   readonly="1"/>
+                        </list>
+                    </field>
+
+                    <!-- 提交后只读预览 -->
+                    <div class="oe_clear"/>
+                    <separator string="表单内容" invisible="state == 'draft'"/>
+                    <div invisible="state == 'draft'" style="width:100%">
+                        <field name="dynamic_form_html" widget="html" nolabel="1" readonly="1"
+                               options="{'sanitize': false}" style="width:100%"/>
+                    </div>
+                    <field name="form_data" invisible="1"/>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_form_instance_list" model="ir.ui.view">
+        <field name="name">hc.form.instance.list</field>
+        <field name="model">hc.form.instance</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="template_id"/>
+                <field name="applicant_id"/>
+                <field name="apply_date"/>
+                <field name="state" widget="badge"/>
+                <field name="approval_state" widget="badge"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_form_instance_search" model="ir.ui.view">
+        <field name="name">hc.form.instance.search</field>
+        <field name="model">hc.form.instance</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="template_id"/>
+                <field name="applicant_id"/>
+                <filter name="draft" string="草稿" domain="[('state', '=', 'draft')]"/>
+                <filter name="done" string="已提交" domain="[('state', '=', 'done')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_form_instance" model="ir.actions.act_window">
+        <field name="name">我的表单</field>
+        <field name="res_model">hc.form.instance</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_form_instance_all" model="ir.actions.act_window">
+        <field name="name">全部表单</field>
+        <field name="res_model">hc.form.instance</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>
