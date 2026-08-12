@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="purchase_order_form_inherit_approval" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.approval</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//sheet" position="before">
+                <div groups="approval_cn.group_approval_user">
+                    <field name="approval_category_id"
+                           invisible="state != 'draft' or approval_request_id"/>
+                    <button name="action_submit_approval" type="object"
+                            string="提交审批" class="btn-primary"
+                            invisible="state != 'draft' or approval_request_id"/>
+                    <button name="action_view_approval" type="object"
+                            string="查看审批" class="btn-secondary"
+                            invisible="not approval_request_id"/>
+                </div>
+                <field name="approval_state" widget="badge"
+                       invisible="not approval_request_id"
+                       decoration-warning="approval_state == 'submitted'"
+                       decoration-success="approval_state == 'approved'"
+                       decoration-danger="approval_state == 'rejected'"
+                       decoration-muted="approval_state == 'cancelled'"/>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="purchase_order_tree_inherit_approval" model="ir.ui.view">
+        <field name="name">purchase.order.list.inherit.approval</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="after">
+                <field name="approval_state" widget="badge" optional="show"
+                       decoration-warning="approval_state == 'submitted'"
+                       decoration-success="approval_state == 'approved'"
+                       decoration-danger="approval_state == 'rejected'"
+                       decoration-muted="approval_state == 'cancelled'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="purchase_order_search_inherit_approval" model="ir.ui.view">
+        <field name="name">purchase.order.search.inherit.approval</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="approval_request_id"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
