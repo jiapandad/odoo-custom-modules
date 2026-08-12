@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- 扩展项目列表视图：添加总花费列 -->
+    <record id="view_project_project_list_inherit_cost" model="ir.ui.view">
+        <field name="name">project.project.list.inherit.cost</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <field name="total_cost" optional="show" widget="monetary"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
