@@ -4,8 +4,8 @@
 # U8 服务器基础连接
 U8_SERVER_BASE = {
     "server": "",
-    "user": "odoo_sync",
-    "password": "Odoo@Sync2026",
+    "user": "",
+    "password": "",
 }
 
 # Odoo 连接
