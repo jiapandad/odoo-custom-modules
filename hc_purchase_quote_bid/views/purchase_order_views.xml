@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_supplier_quote" model="ir.actions.act_window">
+        <field name="name">供应商报价</field>
+        <field name="res_model">hc.supplier.quote</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_bid_comparison" model="ir.actions.act_window">
+        <field name="name">比价单</field>
+        <field name="res_model">hc.bid.comparison</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>
