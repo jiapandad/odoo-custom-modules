@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ── 审批记录 List ── -->
+    <record id="view_approval_record_tree" model="ir.ui.view">
+        <field name="name">approval.record.tree</field>
+        <field name="model">approval.record</field>
+        <field name="arch" type="xml">
+            <list decoration-success="state == 'approved'"
+                  decoration-danger="state == 'rejected'"
+                  decoration-warning="state == 'pending'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="request_id"/>
+                <field name="node_id"/>
+                <field name="approver_id"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'approved'"
+                       decoration-danger="state == 'rejected'"
+                       decoration-warning="state == 'pending'"
+                       decoration-muted="state == 'cancelled'"/>
+                <field name="comment"/>
+                <field name="approved_date"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── 审批记录 Form ── -->
+    <record id="view_approval_record_form" model="ir.ui.view">
+        <field name="name">approval.record.form</field>
+        <field name="model">approval.record</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="request_id"/>
+                            <field name="node_id"/>
+                            <field name="approver_id"/>
+                        </group>
+                        <group>
+                            <field name="state"/>
+                            <field name="approved_date"/>
+                        </group>
+                    </group>
+                    <group string="审批意见">
+                        <field name="comment" nolabel="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── 审批记录 Search ── -->
+    <record id="view_approval_record_search" model="ir.ui.view">
+        <field name="name">approval.record.search</field>
+        <field name="model">approval.record</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="request_id"/>
+                <field name="node_id"/>
+                <field name="approver_id"/>
+                <separator/>
+                <filter name="pending_filter" string="待审批"
+                        domain="[('state', '=', 'pending')]"/>
+                <filter name="approved_filter" string="已通过"
+                        domain="[('state', '=', 'approved')]"/>
+                <filter name="rejected_filter" string="已驳回"
+                        domain="[('state', '=', 'rejected')]"/>
+                <filter name="my_records" string="我的审批"
+                        domain="[('approver_id', '=', uid)]"/>
+                <separator/>
+                <filter name="group_state" string="状态"
+                        context="{'group_by': 'state'}"/>
+                <filter name="group_node" string="节点"
+                        context="{'group_by': 'node_id'}"/>
+            </search>
+        </field>
+    </record>
+</odoo>
