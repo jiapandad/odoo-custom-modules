@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hc_form_template_admin,hc.form.template.admin,model_hc_form_template,approval_cn.group_approval_admin,1,1,1,1
+access_hc_form_template_user,hc.form.template.user,model_hc_form_template,approval_cn.group_approval_user,1,0,0,0
+access_hc_form_template_field_admin,hc.form.template.field.admin,model_hc_form_template_field,approval_cn.group_approval_admin,1,1,1,1
+access_hc_form_template_field_user,hc.form.template.field.user,model_hc_form_template_field,approval_cn.group_approval_user,1,0,0,0
+access_hc_form_instance_admin,hc.form.instance.admin,model_hc_form_instance,approval_cn.group_approval_admin,1,1,1,1
+access_hc_form_instance_user,hc.form.instance.user,model_hc_form_instance,approval_cn.group_approval_user,1,1,1,1
+access_hc_form_instance_field_admin,hc.form.instance.field.admin,model_hc_form_instance_field,approval_cn.group_approval_admin,1,1,1,1
+access_hc_form_instance_field_user,hc.form.instance.field.user,model_hc_form_instance_field,approval_cn.group_approval_user,1,1,1,1
+access_hc_approval_setup_wizard_admin,hc.approval.setup.wizard.admin,model_hc_approval_setup_wizard,approval_cn.group_approval_admin,1,1,1,1
