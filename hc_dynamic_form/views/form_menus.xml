@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- 动态表单菜单 -->
+    <menuitem id="menu_hc_dynamic_form_root"
+              name="动态表单"
+              sequence="60"
+              groups="approval_cn.group_approval_user"/>
+
+    <menuitem id="menu_my_forms"
+              name="我的表单"
+              parent="menu_hc_dynamic_form_root"
+              action="action_form_instance"
+              sequence="10"/>
+
+    <!-- 快速发起：普通用户从这里选模板发起表单 -->
+    <menuitem id="menu_quick_new"
+              name="快速发起"
+              parent="menu_hc_dynamic_form_root"
+              action="action_form_template_quick"
+              sequence="15"/>
+
+    <menuitem id="menu_all_forms"
+              name="全部表单"
+              parent="menu_hc_dynamic_form_root"
+              action="action_form_instance_all"
+              sequence="20"
+              groups="approval_cn.group_approval_admin"/>
+
+    <menuitem id="menu_form_templates"
+              name="表单模板（管理）"
+              parent="menu_hc_dynamic_form_root"
+              action="action_form_template"
+              sequence="30"
+              groups="approval_cn.group_approval_admin"/>
+
+</odoo>
