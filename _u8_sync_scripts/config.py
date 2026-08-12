@@ -3,7 +3,7 @@
 
 # U8 服务器基础连接
 U8_SERVER_BASE = {
-    "server": "172.15.102.245",
+    "server": "",
     "user": "odoo_sync",
     "password": "Odoo@Sync2026",
 }
@@ -11,9 +11,9 @@ U8_SERVER_BASE = {
 # Odoo 连接
 ODOO_CONFIG = {
     "url": "http://localhost:8069",
-    "db": "wb123data",
-    "username": "postmaster@wanbang.xin",
-    "password": "admin123",
+    "db": "wba",
+    "username": "",
+    "password": "",
 }
 
 # ==========================================
@@ -23,15 +23,12 @@ ODOO_CONFIG = {
 # u8_db: U8 数据库名
 # description: 公司描述（可选）
 COMPANIES = {
-    1: {"u8_db": "UFDATA_999_2025", "description": "四川万邦胜辉"},
-    5: {"u8_db": "UFDATA_998_2025", "description": "宇能锂工"},
-    6: {"u8_db": "UFDATA_998_2025", "description": "谷锂公司"},
-    7: {"u8_db": "UFDATA_998_2025", "description": "中试公司"},
+    1: {"u8_db": "UFDATA_999_2025", "description": "xx公司"},
+    5: {"u8_db": "UFDATA_998_2025", "description": "xx公司"},
+    6: {"u8_db": "UFDATA_998_2025", "description": "xx公司"},
+    7: {"u8_db": "UFDATA_998_2025", "description": "xx公司"},
 }
 
-# 共享同一 U8 账套的公司（他们的 U8 数据在同库中，通过 cVenCode 等字段区分）
-# 当前: 宇能锂工、谷锂公司、中试公司 → UFDATA_998_2025
-#      万邦胜辉 → UFDATA_999_2025
 
 
 def get_u8_config(odoo_company_id):
