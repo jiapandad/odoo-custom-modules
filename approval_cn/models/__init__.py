@@ -7,3 +7,4 @@ from . import approval_request
 from . import approval_record
 from . import approval_cc
 from . import approval_mixin
+from . import approval_countersign
