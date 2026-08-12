@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hc_supplier_quote_user,Supplier Quote User,model_hc_supplier_quote,base.group_user,1,1,1,1
+access_hc_supplier_quote_line_user,Supplier Quote Line User,model_hc_supplier_quote_line,base.group_user,1,1,1,1
+access_hc_bid_comparison_user,Bid Comparison User,model_hc_bid_comparison,base.group_user,1,1,1,1
+access_hc_bid_comparison_line_user,Bid Comparison Line User,model_hc_bid_comparison_line,base.group_user,1,1,1,1
+access_hc_purchase_award_user,Purchase Award User,model_hc_purchase_award,base.group_user,1,1,1,1
