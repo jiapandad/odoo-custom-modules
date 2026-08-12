@@ -1,0 +1,63 @@
+.o_approval_cn_state_draft {
+    color: #6c757d;
+}
+.o_approval_cn_state_submitted {
+    color: #0d6efd;
+}
+.o_approval_cn_state_approved {
+    color: #198754;
+}
+.o_approval_cn_state_rejected {
+    color: #dc3545;
+}
+.o_approval_cn_state_cancelled {
+    color: #6c757d;
+}
+
+.o_approval_cn_badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: 500;
+}
+.o_approval_cn_badge_draft {
+    background-color: #e9ecef;
+    color: #495057;
+}
+.o_approval_cn_badge_submitted {
+    background-color: #cfe2ff;
+    color: #084298;
+}
+.o_approval_cn_badge_approved {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+.o_approval_cn_badge_rejected {
+    background-color: #f8d7da;
+    color: #842029;
+}
+.o_approval_cn_badge_cancelled {
+    background-color: #e9ecef;
+    color: #495057;
+    text-decoration: line-through;
+}
+
+.o_form_view .o_form_sheet {
+    max-width: 100%;
+    flex: 1 1 auto;
+}
+
+.o_form_view .o_form_renderer {
+    max-width: none;
+    flex-wrap: wrap !important;
+}
+.o_form_view .o_form_sheet_bg {
+    max-width: none;
+    flex: 1 1 auto;
+}
+
+.o_form_view .o_form_renderer > *:not(.o_form_sheet_bg) {
+    flex: 0 0 100%;
+    max-width: 100%;
+}
