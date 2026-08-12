@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_approval_reject_wizard" model="ir.ui.view">
+        <field name="name">approval.reject.wizard.form</field>
+        <field name="model">approval.reject.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="request_id" invisible="1"/>
+                    <field name="reason" placeholder="请输入驳回原因..." colspan="2"/>
+                </group>
+                <footer>
+                    <button name="action_confirm_reject" type="object"
+                            string="确认驳回" class="btn-danger"/>
+                    <button string="取消" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_approval_transfer_wizard" model="ir.ui.view">
+        <field name="name">approval.transfer.wizard.form</field>
+        <field name="model">approval.transfer.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="request_id" invisible="1"/>
+                    <field name="target_user_id" colspan="2"
+                           options="{'no_create': True, 'no_open': True}"/>
+                </group>
+                <footer>
+                    <button name="action_confirm_transfer" type="object"
+                            string="确认转交" class="btn-primary"/>
+                    <button string="取消" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_approval_comment_wizard" model="ir.ui.view">
+        <field name="name">approval.comment.wizard.form</field>
+        <field name="model">approval.comment.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="request_id" invisible="1"/>
+                    <field name="comment" placeholder="请输入审批意见（可选）..." colspan="2"/>
+                </group>
+                <footer>
+                    <button name="action_confirm_approve" type="object"
+                            string="审批通过" class="btn-primary"/>
+                    <button string="取消" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    </odoo>
