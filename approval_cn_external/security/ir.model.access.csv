@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_external_config_system,approval.external.config.system,model_approval_external_config,base.group_system,1,1,1,1
+access_external_user_system,approval.external.user.system,model_approval_external_user,base.group_system,1,1,1,1
+access_external_config_approval,approval.external.config.approval,model_approval_external_config,approval_cn.group_approval_admin,1,1,1,1
+access_external_user_approval,approval.external.user.approval,model_approval_external_user,approval_cn.group_approval_admin,1,1,1,1
