@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="hc_dynamic_form.DynamicFormBody" owl="1">
+        <div class="hc-dynamic-form-body">
+            <!-- Loading state -->
+            <div t-if="this.state.loading" class="text-muted p-3">
+                正在加载表单字段...
+            </div>
+
+            <!-- Error state -->
+            <div t-if="this.state.error" class="alert alert-danger">
+                <t t-esc="this.state.error"/>
+            </div>
+
+            <!-- Form fields -->
+            <div t-if="!this.state.loading and !this.state.error">
+                <t t-if="this.state.fields.length == 0">
+                    <p class="text-muted">请先选择表单模板并保存，然后在此填写表单数据。</p>
+                </t>
+                <t t-else="">
+                    <table class="table table-sm table-borderless hc-dynamic-form-table">
+                        <t t-foreach="this.state.fields" t-as="field" t-key="field.id">
+                            <tr>
+                                <td class="fw-bold text-end" style="width: 120px; padding: 6px 8px;">
+                                    <t t-esc="field.name"/>
+                                    <span t-if="field.required" class="text-danger"> *</span>
+                                </td>
+                                <td style="padding: 6px 8px;">
+                                    <!-- Single-line text -->
+                                    <t t-if="field.field_type == 'char'">
+                                        <input type="text" class="form-control"
+                                               t-att-placeholder="field.placeholder"
+                                               t-att-value="this._getValue(field.field_key)"
+                                               t-att-readonly="this.props.readonly"
+                                               t-on-input="(ev) => this._onInput(field.field_key, ev.target.value)"/>
+                                    </t>
+
+                                    <!-- Multiline text -->
+                                    <t t-elif="field.field_type == 'text'">
+                                        <textarea class="form-control" rows="3"
+                                                  t-att-placeholder="field.placeholder"
+                                                  t-att-readonly="this.props.readonly"
+                                                  t-on-input="(ev) => this._onInput(field.field_key, ev.target.value)"
+                                                  t-att-value="this._getValue(field.field_key)"/>
+                                    </t>
+
+                                    <!-- Integer -->
+                                    <t t-elif="field.field_type == 'integer'">
+                                        <input type="number" step="1" class="form-control"
+                                               t-att-placeholder="field.placeholder"
+                                               t-att-value="this._getValue(field.field_key)"
+                                               t-att-readonly="this.props.readonly"
+                                               t-on-input="(ev) => this._onInput(field.field_key, parseInt(ev.target.value) || 0)"/>
+                                    </t>
+
+                                    <!-- Float -->
+                                    <t t-elif="field.field_type == 'float'">
+                                        <input type="number" step="any" class="form-control"
+                                               t-att-placeholder="field.placeholder"
+                                               t-att-value="this._getValue(field.field_key)"
+                                               t-att-readonly="this.props.readonly"
+                                               t-on-input="(ev) => this._onInput(field.field_key, parseFloat(ev.target.value) || 0)"/>
+                                    </t>
+
+                                    <!-- Date -->
+                                    <t t-elif="field.field_type == 'date'">
+                                        <input type="date" class="form-control"
+                                               t-att-value="this._getValue(field.field_key)"
+                                               t-att-readonly="this.props.readonly"
+                                               t-on-input="(ev) => this._onInput(field.field_key, ev.target.value)"/>
+                                    </t>
+
+                                    <!-- Datetime -->
+                                    <t t-elif="field.field_type == 'datetime'">
+                                        <input type="datetime-local" class="form-control"
+                                               t-att-value="this._getValue(field.field_key)"
+                                               t-att-readonly="this.props.readonly"
+                                               t-on-input="(ev) => this._onInput(field.field_key, ev.target.value)"/>
+                                    </t>
+
+                                    <!-- Boolean -->
+                                    <t t-elif="field.field_type == 'boolean'">
+                                        <label class="form-check-label">
+                                            <input type="checkbox" class="form-check-input"
+                                                   t-att-checked="this._getValue(field.field_key)"
+                                                   t-att-readonly="this.props.readonly"
+                                                   t-on-change="(ev) => this._onInput(field.field_key, ev.target.checked)"/>
+                                            <t t-esc="field.placeholder or '是'"/>
+                                        </label>
+                                    </t>
+
+                                    <!-- Selection (dropdown) -->
+                                    <t t-elif="field.field_type == 'selection'">
+                                        <select class="form-control"
+                                                t-att-readonly="this.props.readonly"
+                                                t-on-change="(ev) => this._onInput(field.field_key, ev.target.value)">
+                                            <option value="">-- 请选择 --</option>
+                                            <t t-foreach="field._options" t-as="opt" t-key="opt">
+                                                <option t-att-value="opt"
+                                                        t-att-selected="this._getValue(field.field_key) == opt">
+                                                    <t t-esc="opt"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </t>
+
+                                    <!-- User select -->
+                                    <t t-elif="field.field_type == 'user'">
+                                        <select class="form-control"
+                                                t-att-readonly="this.props.readonly"
+                                                t-on-change="(ev) => this._onInput(field.field_key, parseInt(ev.target.value))">
+                                            <option value="">-- 请选择 --</option>
+                                            <t t-foreach="field._options" t-as="opt" t-key="opt[0]">
+                                                <option t-att-value="opt[0]"
+                                                        t-att-selected="this._getValue(field.field_key) == opt[0]">
+                                                    <t t-esc="opt[1]"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </t>
+
+                                    <!-- Company select -->
+                                    <t t-elif="field.field_type == 'company'">
+                                        <select class="form-control"
+                                                t-att-readonly="this.props.readonly"
+                                                t-on-change="(ev) => this._onInput(field.field_key, parseInt(ev.target.value))">
+                                            <option value="">-- 请选择 --</option>
+                                            <t t-foreach="field._options" t-as="opt" t-key="opt[0]">
+                                                <option t-att-value="opt[0]"
+                                                        t-att-selected="this._getValue(field.field_key) == opt[0]">
+                                                    <t t-esc="opt[1]"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </t>
+
+                                    <!-- many2one -->
+                                    <t t-elif="field.field_type == 'many2one'">
+                                        <select class="form-control"
+                                                t-att-readonly="this.props.readonly"
+                                                t-on-change="(ev) => this._onInput(field.field_key, parseInt(ev.target.value))">
+                                            <option value="">-- 请选择 --</option>
+                                            <t t-foreach="field._options" t-as="opt" t-key="opt[0]">
+                                                <option t-att-value="opt[0]"
+                                                        t-att-selected="this._getValue(field.field_key) == opt[0]">
+                                                    <t t-esc="opt[1]"/>
+                                                </option>
+                                            </t>
+                                        </select>
+                                    </t>
+
+                                    <!-- File / Image -->
+                                    <t t-elif="field.field_type in ('image', 'binary')">
+                                        <input type="file" class="form-control"
+                                               t-att-accept="field.field_type == 'image' ? 'image/*' : null"
+                                               t-att-readonly="this.props.readonly"
+                                               t-on-change="(ev) => this._onFileChange(field.field_key, ev)"/>
+                                        <div t-if="this._getValue(field.field_key)" class="small text-muted">
+                                            文件已上传
+                                        </div>
+                                    </t>
+
+                                    <!-- Rich text -->
+                                    <t t-elif="field.field_type == 'html'">
+                                        <textarea class="form-control" rows="5"
+                                                  t-att-placeholder="field.placeholder"
+                                                  t-att-readonly="this.props.readonly"
+                                                  t-on-input="(ev) => this._onInput(field.field_key, ev.target.value)"
+                                                  t-att-value="this._getValue(field.field_key)"/>
+                                    </t>
+
+                                    <!-- Default: text input -->
+                                    <t t-else="">
+                                        <input type="text" class="form-control"
+                                               t-att-placeholder="field.placeholder"
+                                               t-att-value="this._getValue(field.field_key)"
+                                               t-att-readonly="this.props.readonly"
+                                               t-on-input="(ev) => this._onInput(field.field_key, ev.target.value)"/>
+                                    </t>
+
+                                    <div t-if="field.help_text" class="form-text text-muted small"
+                                         style="margin-top: 2px;">
+                                        <t t-esc="field.help_text"/>
+                                    </div>
+                                </td>
+                            </tr>
+                        </t>
+                    </table>
+                </t>
+            </div>
+        </div>
+    </t>
+
+</templates>
