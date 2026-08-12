@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_u8_account_tree" model="ir.ui.view">
+        <field name="name">hc.u8.account.tree</field>
+        <field name="model">hc.u8.account</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="company_id"/>
+                <field name="server"/>
+                <field name="database"/>
+                <field name="db_user"/>
+                <field name="last_sync"/>
+                <field name="last_sync_status" widget="badge"/>
+                <field name="sync_count_po"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_u8_account_form" model="ir.ui.view">
+        <field name="name">hc.u8.account.form</field>
+        <field name="model">hc.u8.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_sync_all" type="object"
+                            string="手动同步" class="btn-primary"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </header>
+                <sheet>
+                    <group string="U8 连接配置">
+                        <group>
+                            <field name="company_id"
+                                   options="{'no_create': True, 'no_open': True}"/>
+                            <field name="server"/>
+                            <field name="database"/>
+                        </group>
+                        <group>
+                            <field name="db_user"/>
+                            <field name="db_password" password="True"/>
+                            <field name="sequence"/>
+                        </group>
+                    </group>
+                    <group string="同步状态">
+                        <group>
+                            <field name="last_sync"/>
+                            <field name="last_sync_status" widget="badge"/>
+                        </group>
+                        <group>
+                            <field name="sync_count_po"/>
+                        </group>
+                    </group>
+                    <group string="最近日志">
+                        <field name="last_sync_message" nolabel="1" colspan="2"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_u8_account_search" model="ir.ui.view">
+        <field name="name">hc.u8.account.search</field>
+        <field name="model">hc.u8.account</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="company_id"/>
+                <field name="database"/>
+                <field name="server"/>
+                <filter name="active" string="启用" domain="[('active', '=', True)]"/>
+                <filter name="inactive" string="禁用" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+</odoo>
