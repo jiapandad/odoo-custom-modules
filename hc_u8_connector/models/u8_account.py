@@ -80,7 +80,6 @@ class U8AccountConfig(models.Model):
         self._sync_vendors()
         self._sync_products()
         self._sync_stock()
-        return result
 
     def _sync_cron(self):
         """【Cron 调用】所有启用的账套自动同步 PO"""
@@ -94,11 +93,10 @@ class U8AccountConfig(models.Model):
     # ============================================================
 
     def _sync_purchases(self):
-        """Odoo purchase.order → U8 PO_Pomain + PO_Podetails"""
+        """Odoo purchase.order -> U8 PO_Pomain + PO_Podetails
+        增强：智能物料编码映射、供应商自动创建、失败告警"""
         self.ensure_one()
-        # no version import needed
         PO = self.env['purchase.order'].sudo()
-
         orders = PO.search([
             ('state', 'in', ['purchase', 'done']),
             ('company_id', '=', self.company_id.id),
@@ -107,7 +105,6 @@ class U8AccountConfig(models.Model):
             self._update_status('success', '无待同步单据', 0)
             return {'type': 'ir.actions.client', 'tag': 'display_notification',
                     'params': {'title': 'U8同步', 'message': '无待同步单据', 'type': 'info'}}
-
         conn = self._get_connection()
         cur = conn.cursor()
         synced = 0
@@ -115,48 +112,88 @@ class U8AccountConfig(models.Model):
         try:
             for o in orders:
                 odoo_name = o.name
-                # 去重
                 cur.execute("SELECT COUNT(*) FROM PO_Pomain WHERE cPOID = %s", (odoo_name,))
                 if cur.fetchone()[0] > 0:
                     continue
-
-                # 供应商
                 ven_code = o.partner_id.ref if o.partner_id.ref else None
                 if not ven_code:
-                    errors.append(f'{o.name}: 供应商无U8编码')
-                    continue
-
-                # PO 头
-                cur.execute(
-                    "INSERT INTO PO_Pomain (POID,cPOID,dPODate,cVenCode,cDepCode,cMaker,cState,cPeriod) "
-                    "VALUES ((SELECT ISNULL(MAX(POID),0)+1 FROM PO_Pomain),%s,%s,%s,'1','odoo_sync','0',"
-                    "DATEPART(yy,GETDATE()))",
-                    (odoo_name, o.date_order, ven_code))
-
-                # PO 行
-                for line in o.order_line:
-                    code = line.product_id.default_code if line.product_id else 'UNKNOWN'
+                    ven_code = o.partner_id.name[:20].replace(' ', '').replace('(', '').replace(')', '')
                     cur.execute(
-                        "INSERT INTO PO_Podetails (ID,cPOID,cInvCode,iQuantity,iUnitPrice,POID) "
-                        "VALUES ((SELECT ISNULL(MAX(ID),0)+1 FROM PO_Podetails),%s,%s,%s,%s,"
-                        "(SELECT POID FROM PO_Pomain WHERE cPOID=%s))",
-                        (odoo_name, code, line.product_qty, line.price_unit, odoo_name))
+                        "IF NOT EXISTS (SELECT 1 FROM Vendor WHERE cVenCode=%s) INSERT INTO Vendor (cVenCode,cVenName) VALUES (%s,%s)",
+                        (ven_code, ven_code, o.partner_id.name[:50]))
+                    conn.commit()
+                cur.execute(
+                    "INSERT INTO PO_Pomain (POID,cPOID,dPODate,cVenCode,cDepCode,cPersonCode,cPTCode,cSCCode,cPayCode,cexch_name,cMaker,cState,cPeriod) "
+                    "VALUES ((SELECT ISNULL(MAX(POID),0)+1 FROM PO_Pomain),%s,%s,%s,'1','01','01','01','01',%s,%s,%s,'odoo_sync','0',DATEPART(yy,GETDATE()))",
+                    (odoo_name, o.date_order, ven_code, '人民币'))
+                for line in o.order_line:
+                    code = self._get_u8_inv_code(cur, line)
+                    cname = (line.product_id.name or '')[:60]
+                    cur.execute(
+                        "INSERT INTO PO_Podetails (ID,cPOID,cInvCode,cItemName,iQuantity,iUnitPrice,POID) "
+                        "VALUES ((SELECT ISNULL(MAX(ID),0)+1 FROM PO_Podetails),%s,%s,%s,%s,%s,(SELECT POID FROM PO_Pomain WHERE cPOID=%s))",
+                        (odoo_name, code, cname, line.product_qty, line.price_unit, odoo_name))
                 synced += 1
-
             conn.commit()
-            msg = f'同步 {synced} 张PO'
+            msg = '同步 %d 张PO' % synced
             if errors:
-                msg += f'；{len(errors)} 笔跳过({"; ".join(errors[:3])})'
+                msg += '；%d 笔跳过(%s)' % (len(errors), '; '.join(errors[:3]))
             self._update_status('success' if not errors else 'warning', msg, synced)
             return {'type': 'ir.actions.client', 'tag': 'display_notification',
-                    'params': {'title': 'U8同步', 'message': msg,
-                               'type': 'success' if not errors else 'warning'}}
+                    'params': {'title': 'U8同步', 'message': msg, 'type': 'success' if not errors else 'warning'}}
         except Exception as e:
             conn.rollback()
-            self._update_status('error', str(e))
+            err_msg = str(e)[:200]
+            self._update_status('error', err_msg)
+            self._send_sync_alert('error', err_msg)
             raise
         finally:
             conn.close()
+
+    def _get_u8_inv_code(self, cur, line):
+        product = line.product_id
+        if not product:
+            return 'UNKNOWN'
+        code = product.default_code
+        if code:
+            code = code.strip()[:20]
+            cur.execute("SELECT COUNT(*) FROM Inventory WHERE cInvCode=%s", (code,))
+            if cur.fetchone()[0] > 0:
+                return code
+        if product.barcode:
+            code = product.barcode.strip()[:20]
+            cur.execute("SELECT COUNT(*) FROM Inventory WHERE cInvCode=%s", (code,))
+            if cur.fetchone()[0] > 0:
+                return code
+        code = (product.default_code or 'ODOO%d' % product.id)[:20]
+        name = (product.name or 'Product')[:60]
+        unit = (product.uom_id.name or '个')[:10]
+        try:
+            cur.execute(
+                "IF NOT EXISTS (SELECT 1 FROM Inventory WHERE cInvCode=%s) INSERT INTO Inventory (cInvCode,cInvName,cInvStd,cInvCCode) VALUES (%s,%s,%s,%s)",
+                (code, code, name, unit, '01'))
+        except:
+            pass
+        return code
+
+    def _send_sync_alert(self, status, message):
+        try:
+            body = 'U8同步告警 [%s]\n状态: %s\n详情: %s' % (self.database, status, message)
+            admin_group = self.env.ref('base.group_erp_manager', raise_if_not_found=False)
+            if admin_group:
+                for user in admin_group.users:
+                    self.env['mail.message'].sudo().create({
+                        'subject': 'U8同步失败 - %s' % self.database,
+                        'body': body,
+                        'model': 'hc.u8.account',
+                        'res_id': self.id,
+                        'message_type': 'notification',
+                        'partner_ids': [(4, user.partner_id.id)],
+                    })
+        except Exception:
+            pass
+
+
 
     # ============================================================
     #  供应商同步（U8 → Odoo）
@@ -236,7 +273,7 @@ class U8AccountConfig(models.Model):
         conn = self._get_connection()
         cur = conn.cursor()
         try:
-            cur.execute("SELECT cInvCode, ISNULL(fQuantity,0) FROM CurrentStock")
+            cur.execute("SELECT cInvCode, ISNULL(iQuantity,0) FROM CurrentStock")
             rows = cur.fetchall()
             if not rows:
                 self._log('库存: CurrentStock 表为空，跳过')
