@@ -170,7 +170,32 @@ class PurchaseRequisition(models.Model):
     # ================================================================
 
     @api.model_create_multi
+    @api.model
+    def default_get(self, fields_list):
+        defaults = super().default_get(fields_list)
+        if "flow_id" in fields_list and not defaults.get("flow_id"):
+            last_flow = self.env["ir.default"].get(
+                "hc.purchase.requisition", "flow_id",
+                user_id=self.env.uid, company_id=self.env.company.id
+            )
+            if last_flow:
+                flow = self.env["approval.flow"].browse(last_flow)
+                if flow.exists() and flow.active:
+                    defaults["flow_id"] = last_flow
+        return defaults
+
+    def write(self, vals):
+        result = super().write(vals)
+        if "flow_id" in vals and vals["flow_id"]:
+            self.env["ir.default"].set(
+                "hc.purchase.requisition", "flow_id",
+                vals["flow_id"],
+                user_id=self.env.uid, company_id=self.env.company.id
+            )
+        return result
+
     def create(self, vals_list):
+
         """请购单号：YYYYMMDD + 4位流水号，每日重置"""
         for vals in vals_list:
             vals['name'] = self._generate_requisition_name()
@@ -204,10 +229,7 @@ class PurchaseRequisition(models.Model):
             seq = 1
         return '%s%04d' % (today_str, seq)
 
-    def write(self, vals):
-        # 禁止手动修改请购单号
-        if 'name' in vals and self.name and vals.get('name') != self.name:
-            raise UserError(_('请购单号由系统自动生成，不允许手动修改。'))
+
 
         # 提交审批后不允许修改关键字段（审批系统回写除外）
         protected_fields = {'line_ids', 'company_id', 'department_id', 'requisition_type'}
